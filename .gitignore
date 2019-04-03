@@ -1,0 +1,4 @@
+.py[cod]
+static/
+.coverage
+htmlcov/

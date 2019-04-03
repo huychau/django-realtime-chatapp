@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  test:
+    build:
+      context: .
+      dockerfile: ./Dockerfile.${ENVIRONMENT}
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT}
+    env_file:
+      - .env.${ENVIRONMENT}
+    command: >
+      bash -c "coverage run --source='.' manage.py test
+      && coverage html"
+    volumes:
+      - .:/code
+    ports:
+      - 8001:8001
