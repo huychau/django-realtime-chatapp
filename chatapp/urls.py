@@ -17,10 +17,16 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from .routers import api_router
 
 
 urlpatterns = [
 
     # Admin
     path('admin/', admin.site.urls),
+
+    # APIs
+    path('api/', include((api_router.urls, 'chatapp'), namespace='api')),
+    path('api-auth/', include('rest_framework.urls')),
+
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
