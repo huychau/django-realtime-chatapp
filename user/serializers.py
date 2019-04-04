@@ -27,7 +27,7 @@ class UserSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
     """Profile Serializer"""
 
-    user = UserSerializer()
+    user = UserSerializer(read_only=True)
 
     url = serializers.HyperlinkedRelatedField(
         view_name='api:profile-detail', source='profile', read_only=True)
