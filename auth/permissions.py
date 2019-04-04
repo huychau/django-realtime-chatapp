@@ -39,6 +39,18 @@ class IsAdminListOnly(permissions.BasePermission):
             and request.user.is_superuser
 
 
+class IsAuthenticatedReadOnly(permissions.BasePermission):
+    """
+    Custom permission to only allow user logged in see list
+    """
+
+    def has_permission(self, request, view):
+        if view.action in ('list', 'retrieve'):
+            # check user is authenticated for 'list' route requests
+            return request.user and request.user.is_authenticated
+        return True
+
+
 class IsSelfOrAdminUpdateDeleteOnly(permissions.BasePermission):
     """
     Custom permission:
