@@ -1,7 +1,7 @@
 from django.contrib.auth import password_validation
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-from .models import User, Profile
+from .models import User, Profile, Friend
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -46,6 +46,22 @@ class ProfileSerializer(serializers.ModelSerializer):
             'address',
         )
 
+
+class FriendSerializer(serializers.ModelSerializer):
+    """Friend Serializer"""
+
+    from_user = UserSerializer(read_only=True)
+    to_user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = Friend
+        fields = (
+            'id',
+            'from_user',
+            'to_user',
+            'message',
+            'created'
+        )
 
 class PasswordSerializer(serializers.Serializer):
     """

@@ -11,26 +11,69 @@ class FriendshipManager(models.Manager):
     """ Friendship manager """
 
     def friends(self, user):
-        """ Return a list of all friends """
+        """
+        Return a list of all friends
+        """
 
-        return Friend.objects.filter(Q(from_user=user) | Q(to_user=user))
+        return Friend.objects.select_related(
+            'from_user', 'to_user').filter(Q(from_user=user) | Q(to_user=user)).all()
 
     def add_friend(self, from_user, to_user, message=None):
-        """ Create a friendship request """
-        pass
+        """
+        Create a friendship request
+        """
+
+        if from_user == to_user:
+            raise ValidationError('Users cannot be friends with themselves.')
+
+        if self.are_friends(from_user, to_user):
+            raise ValidationError('Users are already friends.')
+
+        request, created = Friend.objects.get_or_create(
+            from_user=from_user,
+            to_user=to_user,
+        )
+
+        if message:
+            request.message = message or ''
+            request.save()
+
+        return request
 
     def remove_friend(self, from_user, to_user):
-        """ Destroy a friendship relationship """
-        pass
+        """
+        Destroy a friendship relationship
+        """
 
-    def are_friends(self, from_user, to_user):
-        pass
+        try:
+            qs = Friend.objects.filter(
+                Q(to_user=to_user, from_user=from_user) |
+                Q(to_user=from_user, from_user=to_user)
+            ).distinct().all()
+            if qs:
+                qs.delete()
+                return True
+            else:
+                return False
+        except Friend.DoesNotExist:
+            return 'Friendship does not exist.'
+
+    def are_friends(self, user_1, user_2):
+        """
+        Check users are friends
+        """
+        try:
+            friends = Friend.objects.filter(Q(from_user=user_1, to_user=user_2) | Q(from_user=user_2, to_user=user_1))
+
+            return len(friends) > 0
+        except Friend.DoesNotExist:
+            return False
 
 
 class User(AbstractUser):
     created = models.DateTimeField(auto_now_add=True, editable=False)
-    username = models.CharField(unique=True, max_length=80)
-    email = models.EmailField(unique=True)
+    username = models.CharField(_('username'), unique=True, max_length=100)
+    email = models.EmailField(_('email address'), unique=True)
     is_online = models.BooleanField(default=False)
 
     class Meta:
@@ -48,7 +91,7 @@ class Profile(models.Model):
     birth_date = models.DateField(null=True, blank=True)
     phone = models.CharField(max_length=15, blank=True)
     bio = models.TextField(max_length=500, blank=True)
-    address = models.CharField(max_length=30, blank=True)
+    address = models.CharField(max_length=100, blank=True)
 
     def __str__(self):
         return self.user.username
@@ -63,6 +106,7 @@ class Friend(models.Model):
         settings.base.AUTH_USER_MODEL, related_name='creator', on_delete=models.CASCADE)
     to_user = models.ForeignKey(
         settings.base.AUTH_USER_MODEL, related_name='friends', on_delete=models.CASCADE)
+    message = models.CharField(max_length=100, blank=True)
 
     objects = FriendshipManager()
 
@@ -83,5 +127,6 @@ class Friend(models.Model):
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
         profile, created = Profile.objects.get_or_create(user=instance)
+        return profile
 
 post_save.connect(create_user_profile, sender=User)
