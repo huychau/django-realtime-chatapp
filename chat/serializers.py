@@ -1,12 +1,12 @@
 from rest_framework import serializers
 from user.serializers import UserSerializer
-from .models import Room, Participant, Message
+from .models import Room, Message
 
 
 class RoomSerializer(serializers.ModelSerializer):
     """Room Serializer"""
 
-    creator = UserSerializer(read_only=True)
+    user = UserSerializer(read_only=True)
 
     class Meta:
         model = Room
@@ -14,26 +14,19 @@ class RoomSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'label',
-            'creator'
+            'user',
+            'users'
         )
 
+    def to_representation(self, instance):
+        """Serializer for foreign key"""
 
-class ParticipantSerializer(serializers.ModelSerializer):
-    """Participant Serializer"""
-
-    creator = UserSerializer(read_only=True)
-
-    class Meta:
-        model = Participant
-        fields = (
-            'id',
-        )
+        self.fields['users'] = UserSerializer(many=True)
+        return super(RoomSerializer, self).to_representation(instance)
 
 
 class MessageSerializer(serializers.ModelSerializer):
     """Message Serializer"""
-
-    creator = UserSerializer(read_only=True)
 
     class Meta:
         model = Message
