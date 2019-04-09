@@ -3,3 +3,6 @@ psycopg2-binary>=2.7,<3.0
 djangorestframework==3.9.2
 django-filter==2.1.0
 djangorestframework_simplejwt
+channels_redis
+channels
+uvicorn

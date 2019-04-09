@@ -7,6 +7,11 @@ services:
     environment:
       POSTGRES_PASSWORD: postgres
 
+  redis:
+    image: redis
+    restart: always
+    ports:
+      - 6379:6379
   api:
     build:
       context: .
@@ -19,10 +24,11 @@ services:
       bash -c "python manage.py makemigrations
       && python manage.py migrate
       && python manage.py collectstatic --noinput
-      && /usr/local/bin/gunicorn chatapp.wsgi:application -w 2 -b :8000 --reload"
+      && uvicorn --host 0.0.0.0 --port 8000 --debug chatapp.asgi:application"
     volumes:
       - .:/code
     ports:
       - 8000:8000
     depends_on:
       - db
+      - redis

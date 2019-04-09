@@ -1,3 +1,5 @@
+from django.utils.safestring import mark_safe
+import json
 from django.shortcuts import render
 from rest_framework import viewsets, status
 from rest_framework.response import Response
@@ -37,12 +39,20 @@ class RoomViewSet(viewsets.ModelViewSet):
         """
         serializer.save(user=self.request.user)
 
-    @action(detail=True, methods=['post'],
-            permission_classes=[IsAuthenticated, IsAdminOrIsSelf])
+    @action(detail=True, methods=['post'])
     def add_users(self, request):
         """
         Creator can add more users to the room, maximum is 10
         """
 
-        user = self.get_object()
+        pass
 
+
+# For test websocket
+def index(request):
+    return render(request, 'chat/index.html', {})
+
+def room(request, room_name):
+    return render(request, 'chat/room.html', {
+        'room_name_json': mark_safe(json.dumps(room_name))
+    })
