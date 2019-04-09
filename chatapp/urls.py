@@ -19,6 +19,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from .routers import api_router
 
+app_name = 'chatapp'
 
 urlpatterns = [
 
@@ -26,7 +27,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     # APIs
-    path('api/', include((api_router.urls, 'chatapp'), namespace='api')),
+    path('api/', include(api_router.urls)),
     path('api-auth/', include('rest_framework.urls')),
+
+    path('chat/', include('chat.urls')),
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
