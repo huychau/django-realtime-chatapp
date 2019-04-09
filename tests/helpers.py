@@ -29,15 +29,19 @@ class TestAPI():
             testcase.normaluser_credentials['password']
         )
 
+    def login(self, testcase, credentials=None):
+        url = reverse('user-login')
+        return testcase.client.post(
+            url,
+            credentials,
+            format='json'
+        )
+
     def get_access_token(self, testcase, credentials=None):
 
         if credentials:
-            url = reverse('api:user-login')
-            response = testcase.client.post(
-                url,
-                credentials,
-                format='json'
-            )
+            url = reverse('user-login')
+            response = self.login(testcase, credentials)
 
             testcase.assertEqual(response.status_code, 200)
 
@@ -49,7 +53,7 @@ class TestAPI():
         }
 
     def get_forbibden(self, testcase, resource, args=None):
-        url = reverse(f'api:{resource}', args=args)
+        url = reverse(resource, args=args)
         response = testcase.client.get(url, format='json')
 
         testcase.assertEqual(response.status_code, 403)
@@ -57,7 +61,7 @@ class TestAPI():
     def get_ok(self, testcase, resource, credentials, args=None, results_len=None):
         """User logged in can get list"""
 
-        url = reverse(f'api:{resource}', args=args)
+        url = reverse(resource, args=args)
         headers = self.get_headers(
             self.get_access_token(testcase, credentials))
 

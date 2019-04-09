@@ -12,6 +12,26 @@ class UserAPITest(APITestCase):
     def setUp(self):
         test_api.set_up(self)
 
+    def test_user_login_empty_credentials(self):
+        response = test_api.login(self)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.data['error'], 'Please provide both username and password')
+
+    def test_user_login_invalid_credentials(self):
+        credentials = {
+            'username': 'invalid',
+            'password': 'invalid'
+        }
+        response = test_api.login(self, credentials)
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.data['error'], 'Invalid Credentials')
+
+    def test_user_login_ok(self):
+        response = test_api.login(
+            self, self.normaluser_credentials)
+        self.assertEqual(response.status_code, 200)
+
     def test_get_user_list_forbibden(self):
         """User must login to get list user"""
 
