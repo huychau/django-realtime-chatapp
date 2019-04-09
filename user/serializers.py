@@ -7,8 +7,6 @@ from .models import User, Profile, Friend
 class UserSerializer(serializers.ModelSerializer):
     """User Serializer"""
 
-    url = serializers.HyperlinkedRelatedField(view_name='api:user-detail', source='user', read_only=True)
-
     # Modify fields
     email = serializers.EmailField(
         validators=[UniqueValidator(queryset=User.objects.all())])
@@ -28,9 +26,6 @@ class ProfileSerializer(serializers.ModelSerializer):
     """Profile Serializer"""
 
     user = UserSerializer(read_only=True)
-
-    url = serializers.HyperlinkedRelatedField(
-        view_name='api:profile-detail', source='profile', read_only=True)
 
     class Meta:
         model = Profile

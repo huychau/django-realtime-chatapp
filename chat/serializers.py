@@ -15,7 +15,8 @@ class RoomSerializer(serializers.ModelSerializer):
             'name',
             'label',
             'user',
-            'users'
+            'users',
+            'url',
         )
 
     def to_representation(self, instance):

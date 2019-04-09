@@ -30,7 +30,8 @@ class RoomViewSet(viewsets.ModelViewSet):
         """
         queryset = Room.objects.filter(user=request.user)
         page = self.paginate_queryset(queryset)
-        serializer = RoomSerializer(page, many=True)
+        serializer = RoomSerializer(
+            page, many=True, context={'request': request})
         return self.get_paginated_response(serializer.data)
 
     def perform_create(self, serializer):
