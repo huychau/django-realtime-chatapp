@@ -1,7 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
-from user.models import User
+from user.models import User, Friend
 from chatapp import constants
 
 
@@ -10,7 +10,7 @@ class RoomManager(models.Manager):
     Room manager
     """
 
-    def add_users(self, room_id, users):
+    def add_users(self, request_user, room_id, users):
         """
         Add new users to existed room
         :param room_id: Room ID
@@ -23,6 +23,10 @@ class RoomManager(models.Manager):
         room = Room.objects.get(pk=room_id)
 
         for user in users:
+
+            # Check user friendship
+            if not Friend.objects.are_friends(request_user, user):
+                raise ValidationError('You can not add user is not friendship.')
 
             # Check max users in a room
             if len(room.users.all()) >= constants.ROOM_MAXIMUM_USERS:

@@ -50,7 +50,7 @@ class RoomViewSet(viewsets.ModelViewSet):
         try:
             users = request.data.get('users', [])
 
-            room = Room.objects.add_users(pk, users)
+            room = Room.objects.add_users(request.user, pk, users)
             serializer = RoomSerializer(room, context={'request': request})
             return Response(serializer.data)
 
