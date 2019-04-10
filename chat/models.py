@@ -29,15 +29,4 @@ class Message(models.Model):
         ordering = ('-id',)
 
     def __str__(self):
-        return 'Message from {self.sender} to {self.}'
-
-
-# class Participant(models.Model):
-#     created = models.DateTimeField(auto_now_add=True, editable=False)
-#     user = models.ForeignKey(
-#         User, on_delete=models.CASCADE, related_name='participant_user')
-#     room = models.ForeignKey(
-#         Room, on_delete=models.CASCADE, related_name='participant_group')
-
-#     class Meta:
-#         ordering = ('-id',)
+        return 'Message from {self.user}'
