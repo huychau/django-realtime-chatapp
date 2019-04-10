@@ -20,7 +20,11 @@ class RoomSerializer(serializers.ModelSerializer):
             'url',
         )
 
-        extra_kwargs = {'users': {'required': True}}
+        extra_kwargs = {
+            'users': {
+                'required': True
+            }
+        }
 
     def validate_users(self, value):
         """

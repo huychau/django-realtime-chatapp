@@ -3,6 +3,7 @@ import json
 from django.shortcuts import render
 from rest_framework import viewsets, status
 from rest_framework.response import Response
+from django.core.exceptions import ValidationError
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from django.db import IntegrityError
@@ -41,13 +42,36 @@ class RoomViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
     @action(detail=True, methods=['post'])
-    def add_users(self, request):
+    def add_users(self, request, pk=None):
         """
-        Creator can add more users to the room, maximum is 10
+        Creator can add more users to the room
         """
 
-        pass
+        try:
+            users = request.data.get('users', [])
 
+            room = Room.objects.add_users(pk, users)
+            serializer = RoomSerializer(room, context={'request': request})
+            return Response(serializer.data)
+
+        except (ValidationError, IntegrityError) as err:
+            return Response({'users': err}, status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['delete'])
+    def remove_users(self, request, pk=None):
+        """
+        Creator can remove users from the room
+        """
+
+        try:
+            users = request.data.get('users', [])
+
+            room = Room.objects.remove_users(pk, users)
+            serializer = RoomSerializer(room, context={'request': request})
+            return Response(serializer.data)
+
+        except (ValidationError, IntegrityError) as err:
+            return Response({'users': err}, status.HTTP_400_BAD_REQUEST)
 
 # For test websocket
 def index(request):
