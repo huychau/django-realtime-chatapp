@@ -2,21 +2,37 @@ from rest_framework import permissions
 
 
 class IsSelf(permissions.BasePermission):
+    """
+    Check user request the resources he/she is owner
+    """
+
     def has_object_permission(self, request, view, obj):
         return obj == request.user
 
 
 class IsAdmin(permissions.BasePermission):
+    """
+    Check user request is admin
+    """
+
     def has_object_permission(self, request, view, obj):
         return obj == request.user.is_superuser
 
 
 class IsAdminOrIsSelf(permissions.BasePermission):
+    """
+    Check user request is admin or self
+    """
+
     def has_object_permission(self, request, view, obj):
         return obj == request.user or request.user.is_superuser
 
 
 class IsSelfOrReadOnly(permissions.BasePermission):
+    """
+    Check the owner can read only
+    """
+
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
             return True
@@ -24,6 +40,9 @@ class IsSelfOrReadOnly(permissions.BasePermission):
 
 
 class IsReadOnly(permissions.BasePermission):
+    """
+    Is read only permission
+    """
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
             return True

@@ -1,1 +1,5 @@
+# Room
 ROOM_MAXIMUM_USERS = 10
+
+# Message
+MESSAGE_MAXIMUM = 50
