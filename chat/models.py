@@ -24,10 +24,6 @@ class RoomManager(models.Manager):
 
         for user in users:
 
-            # Check user friendship
-            if not Friend.objects.are_friends(request_user, user):
-                raise ValidationError('You can not add user is not friendship.')
-
             # Check max users in a room
             if len(room.users.all()) >= constants.ROOM_MAXIMUM_USERS:
                 raise ValidationError(

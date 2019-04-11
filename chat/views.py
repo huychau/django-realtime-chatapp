@@ -11,7 +11,7 @@ from rest_framework import serializers
 from auth.permissions import (
     IsAdminOrIsSelf,
     IsSelfOrAdminUpdateDeleteOnly,
-    IsAdmin,
+    IsAdminReadOnly,
 )
 from .serializers import (
     RoomSerializer,
@@ -23,7 +23,7 @@ from .models import Room, Message
 class RoomViewSet(viewsets.ModelViewSet):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
-    permission_classes = (IsSelfOrAdminUpdateDeleteOnly, IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsSelfOrAdminUpdateDeleteOnly)
 
     def list(self, request):
         """
@@ -81,14 +81,15 @@ class MessageViewSet(viewsets.ModelViewSet):
 
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
-    permission_classes = (IsAdmin, IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsAdminReadOnly)
 
+    def perform_create(self, serializer):
+        """
+        Add `user` param as request user when creating new message
+        """
 
-# For test websocket
-def index(request):
-    return render(request, 'chat/index.html', {})
+        serializer.save(user=self.request.user)
+
 
 def room(request, room_name):
-    return render(request, 'chat/room.html', {
-        'room_name_json': mark_safe(json.dumps(room_name))
-    })
+    pass

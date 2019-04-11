@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
+from user.models import User, Friend
 from user.serializers import UserSerializer
 from .models import Room, Message
 
@@ -44,6 +45,13 @@ class RoomSerializer(serializers.ModelSerializer):
         if len(value) == 1:
             raise ValidationError(['The chat room require at least 2 members.'])
 
+        for new_user in value:
+
+            # Check user friendship
+            if not Friend.objects.are_friends(user, new_user) and user != new_user:
+                raise ValidationError(
+                    f'You can not add user {new_user} because this user is not your friend.')
+
         return value
 
     def to_representation(self, instance):
@@ -53,11 +61,22 @@ class RoomSerializer(serializers.ModelSerializer):
         return super(RoomSerializer, self).to_representation(instance)
 
 
+
+class UserInMessageSerializer(serializers.ModelSerializer):
+    """Room Serializer"""
+
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'username'
+        )
+
+
 class MessageSerializer(serializers.ModelSerializer):
     """Message Serializer"""
 
-    user = UserSerializer(read_only=True)
-    room = RoomSerializer(read_only=True)
+    user = UserInMessageSerializer(read_only=True)
 
     class Meta:
         model = Message

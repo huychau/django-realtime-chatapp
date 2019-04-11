@@ -155,7 +155,8 @@ class FriendViewSet(viewsets.ModelViewSet):
             )
 
             return Response(
-                FriendSerializer(friend_obj).data,
+                FriendSerializer(friend_obj, context={
+                                 'request': request}).data,
                 status.HTTP_201_CREATED
             )
         except ValidationError as err:
