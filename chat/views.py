@@ -11,6 +11,7 @@ from rest_framework import serializers
 from auth.permissions import (
     IsAdminOrIsSelf,
     IsSelfOrAdminUpdateDeleteOnly,
+    IsAdmin,
 )
 from .serializers import (
     RoomSerializer,
@@ -22,8 +23,7 @@ from .models import Room, Message
 class RoomViewSet(viewsets.ModelViewSet):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
-    permission_classes = (IsSelfOrAdminUpdateDeleteOnly,
-                          IsAuthenticated,)
+    permission_classes = (IsSelfOrAdminUpdateDeleteOnly, IsAuthenticated,)
 
     def list(self, request):
         """
@@ -72,6 +72,17 @@ class RoomViewSet(viewsets.ModelViewSet):
 
         except (ValidationError, IntegrityError) as err:
             return Response({'users': err}, status.HTTP_400_BAD_REQUEST)
+
+
+class MessageViewSet(viewsets.ModelViewSet):
+    """
+    Message viewset
+    """
+
+    queryset = Message.objects.all()
+    serializer_class = MessageSerializer
+    permission_classes = (IsAdmin, IsAuthenticated,)
+
 
 # For test websocket
 def index(request):

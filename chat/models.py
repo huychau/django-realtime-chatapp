@@ -59,7 +59,23 @@ class RoomManager(models.Manager):
         return room
 
 
+class MessageManager(models.Manager):
+    """
+    Message manager
+    """
+
+    def last_messages(self, room):
+        """
+        Get last messages
+        """
+        return Message.objects.filter(room=room).order_by('-id')[:constants.MESSAGE_MAXIMUM]
+
+
 class Room(models.Model):
+    """
+    Room model
+    """
+
     name = models.TextField()
     label = models.SlugField(unique=True)
     user = models.ForeignKey(
@@ -77,15 +93,21 @@ class Room(models.Model):
 
 
 class Message(models.Model):
-    room = models.ForeignKey(User, on_delete=models.CASCADE)
+    """
+    Message model
+    """
+
+    room = models.ForeignKey(Room, on_delete=models.CASCADE)
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='message_sender')
     subject = models.CharField(max_length=1000, blank=True)
     message = models.TextField()
     created = models.DateTimeField(auto_now_add=True, editable=False)
 
+    objects = MessageManager
+
     class Meta:
         ordering = ('-id',)
 
     def __str__(self):
-        return 'Message from {self.user}'
+        return f'Message from {self.user}'
