@@ -128,7 +128,8 @@ class FriendViewSet(viewsets.ModelViewSet):
         """
         queryset = Friend.objects.friends(request.user)
         page = self.paginate_queryset(queryset)
-        serializer = FriendSerializer(page, many=True)
+        serializer = FriendSerializer(
+            page, many=True, context={'request': request})
         return self.get_paginated_response(serializer.data)
 
     def create(self, request):

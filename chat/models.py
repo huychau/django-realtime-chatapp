@@ -54,6 +54,22 @@ class RoomManager(models.Manager):
 
         return room
 
+    def get_users(self, room):
+        """
+        Get users in a room
+        :param room: Room object
+        """
+        return room.users.all()
+
+    def is_member(self, room, user):
+        """
+        Check is member in the room
+        :param room: Room object
+        :param user: Request user
+        """
+        return user in room.users.all()
+
+
 
 class MessageManager(models.Manager):
     """

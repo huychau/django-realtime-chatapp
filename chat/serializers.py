@@ -87,3 +87,16 @@ class MessageSerializer(serializers.ModelSerializer):
             'message',
             'created',
         )
+
+    def validate_room(self, room):
+        """
+        Validate room to check user in the room or not
+        """
+
+        # Get request user
+        user = self.context['request'].user
+
+        # Check user is not in room
+        if not Room.objects.is_member(room, user):
+            raise ValidationError('You can not send message because you are not member in this room.')
+        return room
