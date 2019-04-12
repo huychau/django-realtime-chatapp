@@ -3,13 +3,17 @@ from channels.generic.websocket import WebsocketConsumer
 import json
 import asyncio
 from django.core.exceptions import ValidationError
-from user.models import User
 from chatapp.constants import CHAT_ROOM_PREFIX
 from .views import MessageViewSet
 from .models import Message, Room
+# from .serializers import RoomSerializer
+from django.core import serializers
 
 
 class ChatConsumer(WebsocketConsumer):
+    """
+    Chat consumer
+    """
 
     def init_chat(self):
         """
@@ -19,7 +23,7 @@ class ChatConsumer(WebsocketConsumer):
         self.user = self.scope['user']
 
         # Check not valid user
-        if not self.user.is_authenticated:
+        if not self.user or not self.user.is_authenticated:
             self.send_error_message('Require login.')
             return
 
@@ -28,23 +32,57 @@ class ChatConsumer(WebsocketConsumer):
         self.room_group_name = f'{CHAT_ROOM_PREFIX}{self.room_id}'
 
         try:
-
             self.room = Room.objects.get(pk=self.room_id)
             self.room_users = self.room.users.all()
 
             if self.user not in self.room_users:
                 self.send_error_message('User is not in this room.')
-                return
-
-            return True
 
         except (ValidationError, Room.DoesNotExist) as e:
             self.send_error_message(str(e))
-            return False
 
-        return True
+    def connect(self):
+        """
+        Connect to unique channel
+        """
 
-    def fetch_messages(self, data):
+        self.init_chat()
+
+        # Check init success
+        if hasattr(self, 'room_group_name'):
+
+            async_to_sync(self.channel_layer.group_add)(
+                self.room_group_name,
+                self.channel_name
+            )
+
+            self.accept()
+
+    def disconnect(self, close_code):
+        """
+        Disconnect form a channel
+        """
+
+        async_to_sync(self.channel_layer.group_discard)(
+            self.room_group_name,
+            self.channel_name
+        )
+
+    def receive(self, text_data):
+        """
+        Receive message
+        """
+
+        data = json.loads(text_data)
+        self.commands[data['command']](self, data)
+
+    def json_serialize(self, data):
+        """
+        Serializer data to json
+        """
+        return json.loads(serializers.serialize('json', data))
+
+    def fetch_data(self, data):
         """
         Fetch latest messages form a room
         """
@@ -52,12 +90,20 @@ class ChatConsumer(WebsocketConsumer):
         try:
 
             # Get messages form a room
-            messages = Message.objects.last_messages(data['room'])
+            messages = Message.objects.last_messages(self.room.id)
+
+            # Something for client
+            room_serializer = self.json_serialize([self.room, ])
+            users_serializer = self.json_serialize(self.room_users)
+            messages_serializer = self.json_serialize(messages)
 
             content = {
-                'command': 'messages',
-                'messages': self.messages_to_json(messages)
+                'command': 'fetch_data',
+                'messages': messages_serializer,
+                'room': room_serializer[0],
+                'room_users': users_serializer
             }
+
             self.send_message(content)
 
         except ValidationError as e:
@@ -68,38 +114,24 @@ class ChatConsumer(WebsocketConsumer):
         Create new message
         """
 
-        room = Room.objects.get(pk=self.room_id)
-        message = Message.objects.create(
-            user=self.user,
-            message=data['message'],
-            room=room)
+        msg = data['message']
 
-        content = {
-            'command': 'new_message',
-            'message': self.message_to_json(message)
-        }
-        return self.send_chat_message(content)
+        if msg:
 
-    def messages_to_json(self, messages):
-        """
-        Format message list to json
-        """
+            message = Message.objects.create(
+                user=self.user,
+                message=data['message'],
+                room=self.room)
 
-        result = []
-        for message in messages:
-            result.append(self.message_to_json(message))
-        return result
+            message_serializer = self.json_serialize([message, ])
 
-    def message_to_json(self, message):
-        """
-        Format message instance to json
-        """
-
-        return {
-            'user': message.user.username,
-            'message': message.message,
-            'created': str(message.created)
-        }
+            content = {
+                'command': 'new_message',
+                'message': message_serializer[0]
+            }
+            return self.send_chat_message(content)
+        else:
+            return self.send_error_message('Message content is require.')
 
     def send_error_message(self, message):
         """
@@ -126,48 +158,6 @@ class ChatConsumer(WebsocketConsumer):
         message = event['message']
         self.send(text_data=json.dumps(message))
 
-    commands = {
-        'fetch_messages': fetch_messages,
-        'new_message': new_message,
-        'error_message': error_message,
-    }
-
-    def connect(self):
-        """
-        Connect to unique channel
-        """
-
-        self.init_chat()
-
-        # Check init success
-        if hasattr(self, 'room_group_name'):
-
-            async_to_sync(self.channel_layer.group_add)(
-                self.room_group_name,
-                self.channel_name
-            )
-
-            self.accept()
-
-
-    def disconnect(self, close_code):
-        """
-        Disconnect form a channel
-        """
-
-        async_to_sync(self.channel_layer.group_discard)(
-            self.room_group_name,
-            self.channel_name
-        )
-
-    def receive(self, text_data):
-        """
-        Receive message
-        """
-
-        data = json.loads(text_data)
-        self.commands[data['command']](self, data)
-
     def send_message(self, message):
         """
         Hander for message
@@ -192,3 +182,10 @@ class ChatConsumer(WebsocketConsumer):
         """
         message = event['message']
         self.send(text_data=json.dumps(message))
+
+    # Command to send to client
+    commands = {
+        'fetch_data': fetch_data,
+        'new_message': new_message,
+        'error_message': error_message,
+    }
