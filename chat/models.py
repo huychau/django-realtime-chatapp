@@ -67,8 +67,15 @@ class RoomManager(models.Manager):
         :param room: Room object
         :param user: Request user
         """
-        return user in room.users.all()
 
+        # Check room is
+        if isinstance(room, int):
+            room = Room.objects.filter(pk=room)
+
+            if not len(room):
+                raise ValidationError('Room not found.')
+
+        return user in room[0].users.all()
 
 
 class MessageManager(models.Manager):
@@ -76,11 +83,16 @@ class MessageManager(models.Manager):
     Message manager
     """
 
-    def last_messages(self, room):
+    def last_messages(self, room_id):
         """
         Get last messages
         """
-        return Message.objects.filter(room=room).order_by('-id')[:constants.MESSAGE_MAXIMUM]
+
+        # Check room is exist or not
+        if not Room.objects.filter(pk=room_id).exists():
+            raise ValidationError('Can not found this room.')
+
+        return Message.objects.filter(room=room_id).order_by('-created')[:constants.MESSAGE_MAXIMUM][::-1]
 
 
 class Room(models.Model):
@@ -116,7 +128,7 @@ class Message(models.Model):
     message = models.TextField()
     created = models.DateTimeField(auto_now_add=True, editable=False)
 
-    objects = MessageManager
+    objects = MessageManager()
 
     class Meta:
         ordering = ('-id',)
