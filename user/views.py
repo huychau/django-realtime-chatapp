@@ -1,11 +1,12 @@
 
-from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth import authenticate, get_user_model, logout as auth_logout
 from django.db.models import Q
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import viewsets
 from rest_framework.authentication import TokenAuthentication
 from rest_framework import viewsets, status
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
@@ -37,47 +38,6 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (IsSelfOrAdminUpdateDeleteOnly,
                           IsAuthenticatedReadOnly,)
     ordering = ('-id',)
-
-    @action(detail=False, methods=['post'])
-    def login(self, request):
-        """Login by username, password"""
-
-        username = request.data.get('username')
-        password = request.data.get('password')
-
-        # Check username, password
-        if username is None or password is None:
-            return Response(
-                {'error': 'Please provide both username and password'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        user = authenticate(username=username, password=password)
-
-        if not user:
-            return Response({'error': 'Invalid Credentials'},
-                            status=status.HTTP_404_NOT_FOUND)
-
-        # Get user token
-        token = RefreshToken.for_user(user)
-
-        # Set online status
-        user.is_online = True
-        user.save()
-
-        # Serializer user to response
-        serializer = UserSerializer(user, context={'request': request})
-        data = {
-            'refresh': str(token),
-            'access': str(token.access_token),
-            'user': serializer.data
-        }
-
-        return Response(data, status=status.HTTP_200_OK)
-
-    @action(detail=False, methods=['get'])
-    def logout(self, request):
-        """TODO: Logout default is success"""
-        return Response()
 
     @action(detail=True, methods=['post'],
             permission_classes=[IsAuthenticated, IsAdminOrIsSelf])
@@ -189,3 +149,49 @@ class FriendViewSet(viewsets.ModelViewSet):
                 return Response({'error': 'The friendship not found.'}, status.HTTP_404_NOT_FOUND)
         except ValidationError as err:
             return Response({'error': err}, status.HTTP_400_BAD_REQUEST)
+
+
+@csrf_exempt
+@api_view(['POST'])
+def login(request):
+    """Login by username, password"""
+
+    username = request.data.get('username')
+    password = request.data.get('password')
+
+    # Check username, password
+    if username is None or password is None:
+        return Response(
+            {'error': 'Please provide both username and password'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    user = authenticate(username=username, password=password)
+
+    if not user:
+        return Response({'error': 'Invalid Credentials'},
+                        status=status.HTTP_404_NOT_FOUND)
+
+    # Get user token
+    token = RefreshToken.for_user(user)
+
+    # Set online status
+    user.is_online = True
+    user.save()
+
+    # Serializer user to response
+    serializer = UserSerializer(user, context={'request': request})
+    data = {
+        'refresh': str(token),
+        'access': str(token.access_token),
+        'user': serializer.data
+    }
+
+    return Response(data, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@permission_classes((IsAuthenticated,))
+def logout(request):
+    """TODO: Logout default is success"""
+
+    return Response()

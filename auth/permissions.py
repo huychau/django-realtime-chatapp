@@ -58,6 +58,16 @@ class IsAdminListOnly(permissions.BasePermission):
             and request.user.is_superuser
 
 
+class IsAdminReadOnly(permissions.BasePermission):
+    """
+    Custom permission to only allow access to lists, gets for admins
+    """
+
+    def has_permission(self, request, view):
+        return view.action not in ('list', 'retrieve') or request.user \
+            and request.user.is_superuser
+
+
 class IsAuthenticatedReadOnly(permissions.BasePermission):
     """
     Custom permission to only allow user logged in see list
