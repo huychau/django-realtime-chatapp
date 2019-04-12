@@ -1,4 +1,5 @@
 from django.utils.safestring import mark_safe
+from django.contrib.auth.decorators import login_required
 import json
 from django.shortcuts import render
 from rest_framework import viewsets, status
@@ -55,7 +56,10 @@ class RoomViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
 
         except (ValidationError, IntegrityError) as err:
-            return Response({'users': err}, status.HTTP_400_BAD_REQUEST)
+            return Response({'error': err}, status.HTTP_400_BAD_REQUEST)
+
+        except Room.DoesNotExist as e:
+            return Response({'error': str(e)}, status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['delete'])
     def remove_users(self, request, pk=None):
@@ -91,5 +95,13 @@ class MessageViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 
-def room(request, room_name):
-    pass
+def index(request):
+    return render(request, 'chat/index.html', {})
+
+@login_required
+def room(request, room):
+    return render(request, 'chat/room.html', {
+        'room_id_json': mark_safe(json.dumps(room)),
+        'username': mark_safe(json.dumps(request.user.username)),
+        'user_id': mark_safe(json.dumps(request.user.id)),
+    })
