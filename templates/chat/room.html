@@ -1,33 +1,317 @@
-<!-- chat/templates/chat/room.html -->
+ {% load static %}
+
 <!DOCTYPE html>
-<html>
+<html class=''>
+
 <head>
-    <meta charset="utf-8"/>
-    <title>Chat Roomx</title>
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <!------ Include the above in your HEAD tag ---------->
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+    <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+    <!------ Include the above in your HEAD tag ---------->
+    <meta charset='UTF-8'>
+    <meta name="robots" content="noindex">
+    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600,700,300' rel='stylesheet' type='text/css'>
+    <link rel='stylesheet prefetch' href='https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css'>
+    <link rel='stylesheet prefetch' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.2/css/font-awesome.min.css'>
+    <link rel="stylesheet" href="{% static 'style.css' %}" />
 </head>
+
 <body>
-    <textarea id="chat-log" cols="100" rows="20"></textarea><br/>
-    <input id="chat-message-input" type="text" size="100"/><br/>
-    <input id="chat-message-submit" type="button" value="Send"/>
-</body>
-<script>
-    var roomName = {{ room_name_json }};
+    <div id="frame">
+        <div id="sidepanel">
+            <div id="profile">
+                <div class="wrap">
+                    <img id="profile-img" src="http://emilcarlsson.se/assets/mikeross.png" class="online" alt="" />
+                    <p>{{ username }}</p>
+                    <i class="fa fa-chevron-down expand-button" aria-hidden="true"></i>
+                    <div id="status-options">
+                        <ul>
+                            <li id="status-online" class="active">
+                                <span class="status-circle"></span>
+                                <p>Online</p>
+                            </li>
+                            <li id="status-away">
+                                <span class="status-circle"></span>
+                                <p>Away</p>
+                            </li>
+                            <li id="status-busy">
+                                <span class="status-circle"></span>
+                                <p>Busy</p>
+                            </li>
+                            <li id="status-offline">
+                                <span class="status-circle"></span>
+                                <p>Offline</p>
+                            </li>
+                        </ul>
+                    </div>
+                    <div id="expanded">
+                        <label for="twitter">
+																	<i class="fa fa-facebook fa-fw" aria-hidden="true"></i>
+																</label>
+                        <input name="twitter" type="text" value="mikeross" />
+                        <label for="twitter">
+																	<i class="fa fa-twitter fa-fw" aria-hidden="true"></i>
+																</label>
+                        <input name="twitter" type="text" value="ross81" />
+                        <label for="twitter">
+																	<i class="fa fa-instagram fa-fw" aria-hidden="true"></i>
+																</label>
+                        <input name="twitter" type="text" value="mike.ross" />
+                    </div>
+                </div>
+            </div>
+            <div id="search">
+                <label for="">
+															<i class="fa fa-search" aria-hidden="true"></i>
+														</label>
+                <input type="text" placeholder="Search contacts..." />
+            </div>
+            <div id="contacts">
+                <ul>
+                    <li class="contact">
+                        <div class="wrap">
+                            <span class="contact-status online"></span>
+                            <img src="http://emilcarlsson.se/assets/louislitt.png" alt="" />
+                            <div class="meta">
+                                <p class="name">Louis Litt</p>
+                                <p class="preview">You just got LITT up, Mike.</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="contact active">
+                        <div class="wrap">
+                            <span class="contact-status busy"></span>
+                            <img src="http://emilcarlsson.se/assets/harveyspecter.png" alt="" />
+                            <div class="meta">
+                                <p class="name">Harvey Specter</p>
+                                <p class="preview">Wrong. You take the gun, or you pull out a bigger one. Or, you call their bluff. Or, you do any one of a hundred and forty six other things.</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="contact">
+                        <div class="wrap">
+                            <span class="contact-status away"></span>
+                            <img src="http://emilcarlsson.se/assets/rachelzane.png" alt="" />
+                            <div class="meta">
+                                <p class="name">Rachel Zane</p>
+                                <p class="preview">I was thinking that we could have chicken tonight, sounds good?</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="contact">
+                        <div class="wrap">
+                            <span class="contact-status online"></span>
+                            <img src="http://emilcarlsson.se/assets/donnapaulsen.png" alt="" />
+                            <div class="meta">
+                                <p class="name">Donna Paulsen</p>
+                                <p class="preview">Mike, I know everything! I'm Donna..</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="contact">
+                        <div class="wrap">
+                            <span class="contact-status busy"></span>
+                            <img src="http://emilcarlsson.se/assets/jessicapearson.png" alt="" />
+                            <div class="meta">
+                                <p class="name">Jessica Pearson</p>
+                                <p class="preview">Have you finished the draft on the Hinsenburg deal?</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="contact">
+                        <div class="wrap">
+                            <span class="contact-status"></span>
+                            <img src="http://emilcarlsson.se/assets/haroldgunderson.png" alt="" />
+                            <div class="meta">
+                                <p class="name">Harold Gunderson</p>
+                                <p class="preview">Thanks Mike! :)</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="contact">
+                        <div class="wrap">
+                            <span class="contact-status"></span>
+                            <img src="http://emilcarlsson.se/assets/danielhardman.png" alt="" />
+                            <div class="meta">
+                                <p class="name">Daniel Hardman</p>
+                                <p class="preview">We'll meet again, Mike. Tell Jessica I said 'Hi'.</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="contact">
+                        <div class="wrap">
+                            <span class="contact-status busy"></span>
+                            <img src="http://emilcarlsson.se/assets/katrinabennett.png" alt="" />
+                            <div class="meta">
+                                <p class="name">Katrina Bennett</p>
+                                <p class="preview">I've sent you the files for the Garrett trial.</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="contact">
+                        <div class="wrap">
+                            <span class="contact-status"></span>
+                            <img src="http://emilcarlsson.se/assets/charlesforstman.png" alt="" />
+                            <div class="meta">
+                                <p class="name">Charles Forstman</p>
+                                <p class="preview">Mike, this isn't over.</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="contact">
+                        <div class="wrap">
+                            <span class="contact-status"></span>
+                            <img src="http://emilcarlsson.se/assets/jonathansidwell.png" alt="" />
+                            <div class="meta">
+                                <p class="name">Jonathan Sidwell</p>
+                                <p class="preview">
+                                    <span>You:</span> That's bullshit. This deal is solid.
+                                </p>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div id="bottom-bar">
+                <button id="addcontact">
+															<i class="fa fa-user-plus fa-fw" aria-hidden="true"></i>
+															<span>Add contact</span>
+														</button>
+                <button id="settings">
+															<i class="fa fa-cog fa-fw" aria-hidden="true"></i>
+															<span>Settings</span>
+														</button>
+            </div>
+        </div>
+        <div class="content">
+            <div class="contact-profile">
+                <img src="http://emilcarlsson.se/assets/harveyspecter.png" alt="" />
+                <p>Harvey Specter</p>
+                <div class="social-media">
+                    <i class="fa fa-facebook" aria-hidden="true"></i>
+                    <i class="fa fa-twitter" aria-hidden="true"></i>
+                    <i class="fa fa-instagram" aria-hidden="true"></i>
+                </div>
+            </div>
+            <div class="messages">
+                <ul id="chat-logs">
+                </ul>
+            </div>
+            <div class="message-input">
+                <div class="wrap">
+                    <input id="chat-message-input" type="text" placeholder="Write your message..." />
+                    <i class="fa fa-paperclip attachment" aria-hidden="true"></i>
+                    <button id="chat-message-submit" class="submit">
+																<i class="fa fa-paper-plane" aria-hidden="true"></i>
+															</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src='//production-assets.codepen.io/assets/common/stopExecutionOnTimeout-b2a7b3fe212eaa732349046d8416e00a9dec26eb7fd347590fbced3ab38af52e.js'></script>
+    <script src='https://code.jquery.com/jquery-2.2.4.min.js'></script>
+    <script src="{% static 'main.js' %}"></script>
+    <script src="{% static 'reconnecting-websocket.js' %}"></script>
+    <script>
+        {% comment %} $(".messages").animate({
+		            scrollTop: $(document).height()
+		        }, "fast"); {% endcomment %}
+
+		        {% comment %} $("#profile-img").click(function() {
+		            $("#status-options").toggleClass("active");
+		        });
+
+		        $(".expand-button").click(function() {
+		            $("#profile").toggleClass("expanded");
+		            $("#contacts").toggleClass("expanded");
+		        });
+
+		        $("#status-options ul li").click(function() {
+		            $("#profile-img").removeClass();
+		            $("#status-online").removeClass("active");
+		            $("#status-away").removeClass("active");
+		            $("#status-busy").removeClass("active");
+		            $("#status-offline").removeClass("active");
+		            $(this).addClass("active");
+
+		            if ($("#status-online").hasClass("active")) {
+		                $("#profile-img").addClass("online");
+		            } else if ($("#status-away").hasClass("active")) {
+		                $("#profile-img").addClass("away");
+		            } else if ($("#status-busy").hasClass("active")) {
+		                $("#profile-img").addClass("busy");
+		            } else if ($("#status-offline").hasClass("active")) {
+		                $("#profile-img").addClass("offline");
+		            } else {
+		                $("#profile-img").removeClass();
+		            };
+
+		            $("#status-options").removeClass("active");
+		        }); {% endcomment %}
+
+		        {% comment %} function newMessage() {
+		            message = $(".message-input input").val();
+		            if ($.trim(message) == '') {
+		                return false;
+		            }
+		            $('
+												<li class="sent">
+													<img src="http://emilcarlsson.se/assets/mikeross.png" alt="" />
+													<p>' + message + '</p>
+												</li>').appendTo($('.messages ul'));
+		            $('.message-input input').val(null);
+		            $('.contact.active .preview').html('
+												<span>You: </span>' + message);
+		            $(".messages").animate({
+		                scrollTop: $(document).height()
+		            }, "fast");
+		        };
+
+		        $('.submit').click(function() {
+		            newMessage();
+		        });
+
+		        $(window).on('keydown', function(e) {
+		            if (e.which == 13) {
+		                newMessage();
+		                return false;
+		            }
+		        }); {% endcomment %}
+
+    var roomId = {{ room_id_json }};
+    var username = {{ username }};
+    var userId = {{ user_id }};
 
     var chatSocket = new WebSocket(
         'ws://' + window.location.host +
-        '/ws/chat/' + roomName + '/');
+        '/ws/chat/' + roomId + '/');
+
+    chatSocket.onopen = function(e) {
+      fetchMessages();
+    }
 
     chatSocket.onmessage = function(e) {
         var data = JSON.parse(e.data);
-        var message = data['message'];
-        document.querySelector('#chat-log').value += (message + '\n');
+        if (data['command'] === 'messages') {
+          for (let i=0; i<data['messages'].length; i++) {
+            createMessage(data['messages'][i]);
+          }
+        } else if (data['command'] === 'new_message'){
+          createMessage(data['message']);
+        } else {
+          alert('Error: ' + data['message']);
+          console.log(data['command']);
+        }
     };
 
     chatSocket.onclose = function(e) {
         console.error('Chat socket closed unexpectedly');
     };
 
-    document.querySelector('#chat-message-input').focus();
     document.querySelector('#chat-message-input').onkeyup = function(e) {
         if (e.keyCode === 13) {  // enter, return
             document.querySelector('#chat-message-submit').click();
@@ -35,13 +319,45 @@
     };
 
     document.querySelector('#chat-message-submit').onclick = function(e) {
-        var messageInputDom = document.querySelector('#chat-message-input');
+        var messageInputDom = document.getElementById('chat-message-input');
         var message = messageInputDom.value;
         chatSocket.send(JSON.stringify({
-            'message': message
+            'command': 'new_message',
+            'message': message,
+            'username': username,
+            'user_id': userId,
+            'room_id': roomId
         }));
 
         messageInputDom.value = '';
     };
-</script>
+
+    function fetchMessages() {
+      chatSocket.send(JSON.stringify({'command': 'fetch_messages', 'room': roomId }));
+    }
+
+    function createMessage(data) {
+      var author = data['user'];
+      var msgListTag = document.createElement('li');
+      var imgTag = document.createElement('img');
+      var msgTag = document.createElement('p');
+      var usernameTag = document.createElement('span');
+      usernameTag.textContent = author;
+      msgTag.textContent = data.message;
+      imgTag.src = 'https://png.pngtree.com/svg/20161027/631929649c.svg';
+
+      if (author === username) {
+        msgListTag.className = 'sent';
+      } else {
+        msgListTag.className = 'replies';
+      }
+      msgListTag.appendChild(imgTag);
+      // msgListTag.appendChild(usernameTag);
+      msgListTag.appendChild(msgTag);
+      document.querySelector('#chat-logs').appendChild(msgListTag);
+    }
+		        //# sourceURL=pen.js
+    </script>
+</body>
+
 </html>
