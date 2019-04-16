@@ -57,34 +57,31 @@ class FriendshipManager(models.Manager):
         Destroy a friendship relationship
         """
 
-        try:
-            qs = Friend.objects.filter(
-                Q(to_user=to_user, from_user=from_user) |
-                Q(to_user=from_user, from_user=to_user)
-            ).distinct().all()
-            if qs:
-                qs.delete()
-                return True
-            else:
-                return False
-        except Friend.DoesNotExist:
-            return 'Friendship does not exist.'
+        qs = Friend.objects.filter(
+            Q(to_user=to_user, from_user=from_user) |
+            Q(to_user=from_user, from_user=to_user)
+        ).distinct().all()
+
+        if qs:
+            qs.delete()
+            return True
+        else:
+            raise ValidationError('Friendship does not exist.')
+
 
     def are_friends(self, user_1, user_2):
         """
         Check users are friends
         """
-        try:
-            friends = Friend.objects.filter(Q(from_user=user_1, to_user=user_2) | Q(from_user=user_2, to_user=user_1))
+        friends = Friend.objects.filter(Q(from_user=user_1, to_user=user_2) | Q(from_user=user_2, to_user=user_1))
 
-            return len(friends) > 0
-        except Friend.DoesNotExist:
-            return False
+        return len(friends) > 0
 
 
 class User(AbstractUser):
     created = models.DateTimeField(auto_now_add=True, editable=False)
     username = models.CharField(_('username'), unique=True, max_length=100)
+    password = models.CharField(_('password'), max_length=128)
     email = models.EmailField(_('email address'), unique=True)
     is_online = models.BooleanField(default=False)
 
@@ -127,12 +124,6 @@ class Friend(models.Model):
         verbose_name_plural = _('Friends')
         unique_together = ('from_user', 'to_user')
         ordering = ('-id',)
-
-    def save(self, *args, **kwargs):
-        # Ensure users can't be friends with themselves
-        if self.from_user == self.to_user:
-            raise ValidationError("Users cannot be friends with themselves.")
-        super(Friend, self).save(*args, **kwargs)
 
 
 # Auto create user profile when user is created
