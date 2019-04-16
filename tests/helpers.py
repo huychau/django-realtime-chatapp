@@ -5,6 +5,10 @@ from user.models import User
 class TestAPI():
 
     def set_up(self, testcase):
+        """
+        Set up new normal and super users
+        """
+
         testcase.superuser_credentials = {
             'username': 'admin',
             'password': 'password'
@@ -51,27 +55,75 @@ class TestAPI():
             'HTTP_AUTHORIZATION': access_token
         }
 
-    def get_forbibden(self, testcase, resource, args=None):
+
+    def get(self, testcase, resource, credentials=None, args=None, results_len=None):
+        """
+        Helper for get API method
+        :param testcase: APITestCase
+        :param resource: API resource (URL string)
+        :param credentials: User credentials
+        :param args: Resource detail arguments
+        returns: Response
+        """
+
         url = reverse(resource, args=args)
-        response = testcase.client.get(url, format='json')
 
-        testcase.assertEqual(response.status_code, 403)
+        headers = {}
+        if credentials:
+            headers = self.get_headers(
+                self.get_access_token(testcase, credentials))
 
-    def get_ok(self, testcase, resource, credentials, args=None, results_len=None):
-        """User logged in can get list"""
-
-        url = reverse(resource, args=args)
-        headers = self.get_headers(
-            self.get_access_token(testcase, credentials))
-
-        response = testcase.client.get(
+        return testcase.client.get(
             url,
             format='json',
             **headers
         )
 
-        testcase.assertEqual(response.status_code, 200)
+    def post(self, testcase, resource, data=None, credentials=None, args=None):
+        """
+        Helper for post API method
+        :param testcase: APITestCase
+        :param resource: API resource (URL string)
+        :param credentials: User credentials
+        :param args: Resource detail arguments
+        returns: Response
+        """
 
-        if results_len:
-            testcase.assertEqual(
-                len(response.data['results']), results_len)
+        url = reverse(resource, args=args)
+
+        headers = {}
+        if credentials:
+            headers = self.get_headers(
+                self.get_access_token(testcase, credentials))
+
+        return testcase.client.post(
+            url,
+            data,
+            format='json',
+            **headers
+        )
+
+    def put(self, testcase, resource, data=None, credentials=None, args=None):
+        """
+        Helper for pust API method
+        :param testcase: APITestCase
+        :param resource: API resource (URL string)
+        :param credentials: User credentials
+        :param args: Resource detail arguments
+        returns: Response
+        """
+
+        url = reverse(resource, args=args)
+
+        headers = {}
+        if credentials:
+            headers = self.get_headers(
+                self.get_access_token(testcase, credentials))
+
+        return testcase.client.put(
+            url,
+            data,
+            format='json',
+            **headers
+        )
+
