@@ -15,8 +15,20 @@ class FriendshipManager(models.Manager):
         Return a list of all friends
         """
 
-        return Friend.objects.select_related(
+        friends = Friend.objects.select_related(
             'from_user', 'to_user').filter(Q(from_user=user) | Q(to_user=user)).all()
+
+
+        # Check to get only user friend object
+        results = []
+
+        for friend in friends:
+
+            friend_obj = friend.from_user == user and friend.to_user or friend.from_user
+
+            results.append(friend_obj)
+
+        return results
 
     def add_friend(self, from_user, to_user, message=None):
         """

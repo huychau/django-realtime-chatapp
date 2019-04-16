@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import viewsets
 from rest_framework.authentication import TokenAuthentication
 from rest_framework import viewsets, status
-from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.decorators import action, api_view, permission_classes, list_route
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
@@ -69,8 +69,16 @@ class ProfileViewSet(viewsets.ModelViewSet):
     """
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
-    permission_classes = (IsSelfOrAdminUpdateDeleteOnly,)
+    permission_classes = (IsAuthenticated, IsSelfOrAdminUpdateDeleteOnly,)
     ordering = ('-id',)
+
+    @list_route(methods=['GET'],)
+    def me(self, request, *args, **kwargs):
+        """
+        Get current user profile
+        """
+        self.kwargs.update(pk=request.user.id)
+        return self.retrieve(request, *args, **kwargs)
 
 
 class FriendViewSet(viewsets.ModelViewSet):
@@ -88,7 +96,7 @@ class FriendViewSet(viewsets.ModelViewSet):
         """
         queryset = Friend.objects.friends(request.user)
         page = self.paginate_queryset(queryset)
-        serializer = FriendSerializer(
+        serializer = UserSerializer(
             page, many=True, context={'request': request})
         return self.get_paginated_response(serializer.data)
 
