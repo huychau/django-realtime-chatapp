@@ -39,7 +39,7 @@ class UserViewSet(viewsets.ModelViewSet):
                           IsAuthenticatedReadOnly,)
     ordering = ('-id',)
 
-    @action(detail=True, methods=['post'],
+    @action(detail=True, methods=['put'],
             permission_classes=[IsAuthenticated, IsAdminOrIsSelf])
     def change_password(self, request, pk=None):
         """Change user password"""
@@ -134,7 +134,7 @@ class FriendViewSet(viewsets.ModelViewSet):
     @action(methods=['delete'], detail=False)
     def delete(self, request, pk=None):
         """
-        Creates a friend request
+        Creates a delete friend request
         :param user_id: Friend ID
         returns: Friendship object
         """
@@ -148,13 +148,10 @@ class FriendViewSet(viewsets.ModelViewSet):
             )
         try:
             success = Friend.objects.remove_friend(request.user, user_id)
-
             if success:
                 return Response(
                     status=status.HTTP_204_NO_CONTENT
                 )
-            else:
-                return Response({'error': 'The friendship not found.'}, status.HTTP_404_NOT_FOUND)
         except ValidationError as err:
             return Response({'error': err}, status.HTTP_400_BAD_REQUEST)
 
@@ -177,7 +174,7 @@ def login(request):
 
     if not user:
         return Response({'error': 'Invalid Credentials'},
-                        status=status.HTTP_404_NOT_FOUND)
+                        status=status.HTTP_401_UNAUTHORIZED)
 
     # Get user token
     token = RefreshToken.for_user(user)
