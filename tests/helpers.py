@@ -30,7 +30,7 @@ class TestAPI():
         )
 
     def login(self, testcase, credentials=None):
-        url = reverse('user-login')
+        url = reverse('login')
         return testcase.client.post(
             url,
             credentials,
@@ -40,7 +40,6 @@ class TestAPI():
     def get_access_token(self, testcase, credentials=None):
 
         if credentials:
-            url = reverse('user-login')
             response = self.login(testcase, credentials)
 
             testcase.assertEqual(response.status_code, 200)

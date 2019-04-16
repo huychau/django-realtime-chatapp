@@ -12,8 +12,8 @@ api_router.register('rooms', RoomViewSet, base_name='room')
 api_router.register('messages', MessageViewSet, base_name='message')
 
 urlpatterns = [
-    path('login/', login),
-    path('logout/', logout),
+    path('login/', login, name='login'),
+    path('logout/', logout, name='logout'),
 ]
 
 urlpatterns += api_router.urls
