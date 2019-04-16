@@ -88,7 +88,7 @@ class IsSelfOrAdminUpdateDeleteOnly(permissions.BasePermission):
     """
 
     def has_object_permission(self, request, view, obj):
-        if view.action in ['create', 'retrieve']:
+        if view.action in ('create', 'retrieve', 'me'):
             return True
 
         return view.action in ['update', 'partial_update', 'destroy'] \
