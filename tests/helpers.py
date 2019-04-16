@@ -105,7 +105,7 @@ class TestAPI():
 
     def put(self, testcase, resource, data=None, credentials=None, args=None):
         """
-        Helper for pust API method
+        Helper for put API method
         :param testcase: APITestCase
         :param resource: API resource (URL string)
         :param credentials: User credentials
@@ -127,3 +127,26 @@ class TestAPI():
             **headers
         )
 
+    def delete(self, testcase, resource, data=None, credentials=None, args=None):
+        """
+        Helper for delete API method
+        :param testcase: APITestCase
+        :param resource: API resource (URL string)
+        :param credentials: User credentials
+        :param args: Resource detail arguments
+        returns: Response
+        """
+
+        url = reverse(resource, args=args)
+
+        headers = {}
+        if credentials:
+            headers = self.get_headers(
+                self.get_access_token(testcase, credentials))
+
+        return testcase.client.delete(
+            url,
+            data,
+            format='json',
+            **headers
+        )

@@ -1,5 +1,5 @@
 from django.urls import reverse
-from rest_framework.test import
+from rest_framework.test import APITestCase
 from rest_framework import status
 from user.models import User, Profile
 from .helpers import TestAPI
@@ -193,170 +193,103 @@ class UserAPITest(APITestCase):
     #------------------
 
     def test_get_friend_list(self):
+        data = {
+            'user_id': self.superuser.id,
+            'message': 'hi!'
+        }
 
-        headers = test_api.get_headers(
-            test_api.get_access_token(self, self.normaluser_credentials))
-
-        url = reverse('friend-list')
-
-        response = self.client.post(
-            url,
-            {'user_id': self.superuser.id, 'message': 'hi!'},
-            format='json',
-            **headers,
-        )
+        # Add new friend
+        response = test_api.post(
+            self, 'friend-list', data, self.normaluser_credentials)
 
         self.assertEqual(response.status_code, 201)
 
-        response = self.client.get(
-            url,
-            format='json',
-            **headers,
-        )
+        response = test_api.get(
+            self, 'friend-list', self.normaluser_credentials)
 
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data['results']), 1)
 
     def test_add_new_friend_empty_id(self):
-
-        headers = test_api.get_headers(
-            test_api.get_access_token(self, self.normaluser_credentials))
-
-        url = reverse('friend-list')
-
-        response = self.client.post(
-            url,
-            format='json',
-            **headers,
-        )
+        response = test_api.post(
+            self, 'friend-list', {}, self.normaluser_credentials)
 
         self.assertEqual(response.status_code, 400)
 
     def test_add_new_friend_user_not_found(self):
+        data = {'user_id': 100}
 
-        headers = test_api.get_headers(
-            test_api.get_access_token(self, self.normaluser_credentials))
-
-        url = reverse('friend-list')
-
-        response = self.client.post(
-            url,
-            {'user_id': 100},
-            format='json',
-            **headers,
-        )
+        response = test_api.post(
+            self, 'friend-list', data, self.normaluser_credentials)
 
         self.assertEqual(response.status_code, 404)
 
     def test_add_new_friend_can_not_add_themselves(self):
 
-        headers = test_api.get_headers(
-            test_api.get_access_token(self, self.normaluser_credentials))
+        data = {'user_id': self.normaluser.id}
 
-        url = reverse('friend-list')
-
-        response = self.client.post(
-            url,
-            {'user_id': self.normaluser.id},
-            format='json',
-            **headers,
-        )
+        response = test_api.post(
+            self, 'friend-list', data, self.normaluser_credentials)
 
         self.assertEqual(response.status_code, 400)
 
     def test_add_new_friend_already_exist(self):
+        data = {
+            'user_id': self.superuser.id,
+            'message': 'hi!'
+        }
 
-        headers = test_api.get_headers(
-            test_api.get_access_token(self, self.normaluser_credentials))
-
-        url = reverse('friend-list')
-
-        response = self.client.post(
-            url,
-            {'user_id': self.superuser.id},
-            format='json',
-            **headers,
-        )
+       # Add new friend
+        response = test_api.post(
+            self, 'friend-list', data, self.normaluser_credentials)
 
         self.assertEqual(response.status_code, 201)
 
-        response = self.client.post(
-            url,
-            {'user_id': self.superuser.id},
-            format='json',
-            **headers,
-        )
+        response = test_api.post(
+            self, 'friend-list', data, self.normaluser_credentials)
 
         self.assertEqual(response.status_code, 400)
 
 
     def test_add_new_friend_ok(self):
-
-        headers = test_api.get_headers(
-            test_api.get_access_token(self, self.normaluser_credentials))
-
-        url = reverse('friend-list')
-
-        response = self.client.post(
-            url,
-            {'user_id': self.superuser.id, 'message': 'hi!'},
-            format='json',
-            **headers,
-        )
+        data = {
+            'user_id': self.superuser.id,
+            'message': 'hi!'
+        }
+        response = test_api.post(
+            self, 'friend-list', data, self.normaluser_credentials)
 
         self.assertEqual(response.status_code, 201)
 
-    def test_remove_friend_empty_user_id(self):
-
-        headers = test_api.get_headers(
-            test_api.get_access_token(self, self.normaluser_credentials))
-
-        url = reverse('friend-list')
-
-        response = self.client.delete(
-            url,
-            format='json',
-            **headers,
-        )
+    def test_delete_friend_empty_user_id(self):
+        response = test_api.delete(
+            self, 'friend-list', None, self.normaluser_credentials)
 
         self.assertEqual(response.status_code, 400)
 
-    def test_remove_friend_not_existed(self):
+    def test_delete_friend_not_existed(self):
+        data = {'user_id': self.superuser.id}
 
-        headers = test_api.get_headers(
-            test_api.get_access_token(self, self.normaluser_credentials))
-
-        url = reverse('friend-list')
-
-        response = self.client.delete(
-            url,
-            {'user_id': self.superuser.id},
-            format='json',
-            **headers,
-        )
+        response = test_api.delete(
+            self, 'friend-list', data, self.normaluser_credentials)
 
         self.assertEqual(response.status_code, 400)
 
-    def test_remove_friend_ok(self):
+    def test_delete_friend_ok(self):
+        data = {
+            'user_id': self.superuser.id,
+            'message': 'hi!'
+        }
 
-        headers = test_api.get_headers(
-            test_api.get_access_token(self, self.normaluser_credentials))
-
-        url = reverse('friend-list')
-
-        response = self.client.post(
-            url,
-            {'user_id': self.superuser.id},
-            format='json',
-            **headers,
-        )
+        # Add new friend
+        response = test_api.post(
+            self, 'friend-list', data, self.normaluser_credentials)
 
         self.assertEqual(response.status_code, 201)
 
-        response = self.client.delete(
-            url,
-            {'user_id': self.superuser.id},
-            format='json',
-            **headers,
-        )
+        data = {'user_id': self.superuser.id}
+
+        response = test_api.delete(
+            self, 'friend-list', data, self.normaluser_credentials)
 
         self.assertEqual(response.status_code, 204)
