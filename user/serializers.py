@@ -45,6 +45,13 @@ class UserSerializer(serializers.ModelSerializer):
             })
         return fields
 
+    def validate_password(self, value):
+        """
+        Validate user password
+        """
+        password_validation.validate_password(value, self.instance)
+        return value
+
     def create(self, validated_data):
         """
         Override create method to create user password

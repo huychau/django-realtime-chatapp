@@ -3,6 +3,7 @@ from django.db.models import Q
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
+from django.core.validators import MinLengthValidator
 from django.db.models.signals import post_save
 from chatapp import settings
 
@@ -80,7 +81,8 @@ class FriendshipManager(models.Manager):
 
 class User(AbstractUser):
     created = models.DateTimeField(auto_now_add=True, editable=False)
-    username = models.CharField(_('username'), unique=True, max_length=100)
+    username = models.CharField(
+        _('username'), unique=True, max_length=50, validators=[MinLengthValidator(2),])
     password = models.CharField(_('password'), max_length=128)
     email = models.EmailField(_('email address'), unique=True)
     is_online = models.BooleanField(default=False)
@@ -103,7 +105,7 @@ class Profile(models.Model):
     address = models.CharField(max_length=100, blank=True)
 
     def __str__(self):
-        return self.user.username
+        return f'{self.first_name} {self.last_name}'.strip()
 
     class Meta:
         ordering = ('-id',)
