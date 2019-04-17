@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
+from chatapp import constants
 from user.models import User, Friend
 from user.serializers import UserSerializer
 from .models import Room, Message
@@ -44,6 +45,11 @@ class RoomSerializer(serializers.ModelSerializer):
         # In the case only creator
         if len(value) == 1:
             raise ValidationError(['The chat room require at least 2 members.'])
+
+        # Check max users in a room
+        if len(value) >= constants.ROOM_MAXIMUM_USERS:
+            raise ValidationError(
+                f'Maximum {constants.ROOM_MAXIMUM_USERS} users in a room.')
 
         for new_user in value:
 

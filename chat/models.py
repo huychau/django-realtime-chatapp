@@ -10,6 +10,15 @@ class RoomManager(models.Manager):
     Room manager
     """
 
+    def get_room(self, pk):
+        """
+        Get room instance and raise error if room does not exist
+        """
+        try:
+            return Room.objects.get(pk=pk)
+        except Room.DoesNotExist as e:
+            raise ValidationError(e)
+
     def add_users(self, request_user, room_id, users):
         """
         Add new users to existed room
@@ -20,18 +29,29 @@ class RoomManager(models.Manager):
         if not isinstance(users, (list,)) or not len(users):
             raise ValidationError('New users must a list and not empty.')
 
-        room = Room.objects.get(pk=room_id)
+        room = Room.objects.get_room(room_id)
 
-        for user in users:
+        room_users = room.users.all()
+
+        for new_user in users:
 
             # Check max users in a room
-            if len(room.users.all()) >= constants.ROOM_MAXIMUM_USERS:
+            if len(room_users) >= constants.ROOM_MAXIMUM_USERS:
                 raise ValidationError(
                     f'Maximum {constants.ROOM_MAXIMUM_USERS} users in a room.')
 
-            # Check user is existed or not
-            get_object_or_404(User, pk=user)
-            room.users.add(user)
+            new_user = User.objects.get_user(new_user)
+
+            # Check user is not friendship
+            if not Friend.objects.are_friends(request_user, new_user) and request_user != new_user:
+                raise ValidationError(
+                    f'You can not add user {new_user} because this user is not your friend.')
+
+            # Check user is existed
+            if new_user in room_users:
+                raise ValidationError('You can not add user is existed in this room.')
+
+            room.users.add(new_user)
 
         return room
 
@@ -49,7 +69,7 @@ class RoomManager(models.Manager):
         for user in users:
 
             # Check user is existed or not
-            get_object_or_404(User, pk=user)
+            user = User.objects.get_user(user)
             room.users.remove(user)
 
         return room
