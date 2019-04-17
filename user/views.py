@@ -9,7 +9,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action, api_view, permission_classes, list_route
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
-from django.core.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
 from auth.permissions import (
     IsAdminOrIsSelf,
@@ -57,7 +57,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 )
             user.set_password(serializer.data['new_password'])
             user.save()
-            return Response({'message': 'Password changed.'})
+            return Response({'detail': 'Password changed.'})
         else:
             return Response(serializer.errors,
                             status=status.HTTP_400_BAD_REQUEST)
@@ -128,8 +128,8 @@ class FriendViewSet(viewsets.ModelViewSet):
                                  'request': request}).data,
                 status.HTTP_201_CREATED
             )
-        except ValidationError as err:
-            return Response({'error': err}, status.HTTP_400_BAD_REQUEST)
+        except ValidationError as e:
+            return Response({'detail': e.detail[0]}, status.HTTP_400_BAD_REQUEST)
 
     @action(methods=['delete'], detail=False)
     def delete(self, request, pk=None):
@@ -152,8 +152,8 @@ class FriendViewSet(viewsets.ModelViewSet):
                 return Response(
                     status=status.HTTP_204_NO_CONTENT
                 )
-        except ValidationError as err:
-            return Response({'error': err}, status.HTTP_400_BAD_REQUEST)
+        except ValidationError as e:
+            return Response({'detail': e.detail[0]}, status.HTTP_400_BAD_REQUEST)
 
 
 @csrf_exempt

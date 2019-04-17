@@ -1,14 +1,14 @@
 from django.db import models
 from django.db.models import Q
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager as AbstractUserManager
 from django.utils.translation import ugettext_lazy as _
-from django.core.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, NotFound
 from django.core.validators import MinLengthValidator
 from django.db.models.signals import post_save
 from chatapp import settings
 
 
-class UserManager(models.Manager):
+class UserManager(AbstractUserManager):
     """
     User manager
     """
@@ -20,7 +20,7 @@ class UserManager(models.Manager):
         try:
             return User.objects.get(pk=pk)
         except User.DoesNotExist as e:
-            raise ValidationError(e)
+            raise NotFound(e)
 
 
 class FriendshipManager(models.Manager):
