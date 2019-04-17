@@ -8,8 +8,25 @@ from django.db.models.signals import post_save
 from chatapp import settings
 
 
+class UserManager(models.Manager):
+    """
+    User manager
+    """
+
+    def get_user(self, pk):
+        """
+        Get user instance and raise error if user does not exist
+        """
+        try:
+            return User.objects.get(pk=pk)
+        except User.DoesNotExist as e:
+            raise ValidationError(e)
+
+
 class FriendshipManager(models.Manager):
-    """ Friendship manager """
+    """
+    Friendship manager
+    """
 
     def friends(self, user):
         """
@@ -86,6 +103,8 @@ class User(AbstractUser):
     password = models.CharField(_('password'), max_length=128)
     email = models.EmailField(_('email address'), unique=True)
     is_online = models.BooleanField(default=False)
+
+    objects = UserManager()
 
     class Meta:
         ordering = ('-id',)

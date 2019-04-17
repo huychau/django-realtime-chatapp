@@ -119,7 +119,7 @@ class FriendViewSet(viewsets.ModelViewSet):
         try:
             friend_obj = Friend.objects.add_friend(
                 request.user, #The sender
-                get_object_or_404(get_user_model(), pk=user_id),  # The recipient
+                User.objects.get_user(user_id),  # The recipient
                 message=request.data.get('message', '')
             )
 
