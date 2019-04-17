@@ -30,7 +30,7 @@ class RoomViewSet(viewsets.ModelViewSet):
         """
         Get rooms
         """
-        queryset = Room.objects.filter(user=request.user)
+        queryset = Room.objects.rooms(user=request.user)
         page = self.paginate_queryset(queryset)
         serializer = RoomSerializer(
             page, many=True, context={'request': request})

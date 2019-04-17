@@ -14,10 +14,19 @@ class RoomManager(models.Manager):
         """
         Get room instance and raise error if room does not exist
         """
+
         try:
             return Room.objects.get(pk=pk)
         except Room.DoesNotExist as e:
             raise ValidationError(e)
+
+    def rooms(self, user):
+        """
+        Get the rooms user created or joined
+        """
+
+        return Room.objects.filter(users__id__exact=user.id)
+
 
     def add_users(self, request_user, room_id, users):
         """
