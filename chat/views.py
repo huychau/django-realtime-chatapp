@@ -82,7 +82,24 @@ class MessageViewSet(viewsets.ModelViewSet):
 
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
-    permission_classes = (IsAuthenticated, IsAdminReadOnly)
+    permission_classes = (IsAuthenticated,)
+
+    def list(self, request):
+        """
+        Get user messages from a room
+        """
+
+        try:
+            room_id = request.data.get('room_id')
+
+            queryset = Message.objects.messages(request.user, room_id)
+            page = self.paginate_queryset(queryset)
+            serializer = MessageSerializer(
+                page, many=True, context={'request': request})
+            return self.get_paginated_response(serializer.data)
+
+        except ValidationError as e:
+            return Response({'detail': e.detail[0]}, status.HTTP_400_BAD_REQUEST)
 
     def perform_create(self, serializer):
         """

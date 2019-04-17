@@ -108,7 +108,7 @@ class MessageManager(models.Manager):
     Message manager
     """
 
-    def last_messages(self, room_id):
+    def messages(self, user, room_id, length=None):
         """
         Get last messages
         """
@@ -116,7 +116,10 @@ class MessageManager(models.Manager):
         # Check room is exist or not
         room = Room.objects.get_room(room_id)
 
-        return Message.objects.filter(room=room).order_by('-created')[:constants.MESSAGE_MAXIMUM][::-1]
+        if user not in room.users.all():
+            raise ValidationError('You do not get messages from the room you are not joined.')
+
+        return Message.objects.filter(room=room).order_by('-created')
 
 
 class Room(models.Model):
