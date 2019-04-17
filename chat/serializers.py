@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from django.core.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError
 from chatapp import constants
 from user.models import User, Friend
 from user.serializers import UserSerializer
@@ -56,7 +56,7 @@ class RoomSerializer(serializers.ModelSerializer):
             # Check user friendship
             if not Friend.objects.are_friends(user, new_user) and user != new_user:
                 raise ValidationError(
-                    f'You can not add user {new_user} because this user is not your friend.')
+                    f'You do not add user is not your friend.')
 
         return value
 
@@ -104,5 +104,5 @@ class MessageSerializer(serializers.ModelSerializer):
 
         # Check user is not in room
         if not Room.objects.is_member(room, user):
-            raise ValidationError('You can not send message because you are not member in this room.')
+            raise ValidationError('You do not send message because you are not member in this room.')
         return room

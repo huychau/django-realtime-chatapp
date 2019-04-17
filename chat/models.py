@@ -1,5 +1,5 @@
 from django.db import models
-from django.core.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, NotFound
 from django.shortcuts import get_object_or_404
 from user.models import User, Friend
 from chatapp import constants
@@ -18,7 +18,7 @@ class RoomManager(models.Manager):
         try:
             return Room.objects.get(pk=pk)
         except Room.DoesNotExist as e:
-            raise ValidationError(e)
+            raise NotFound(e)
 
     def rooms(self, user):
         """
@@ -39,7 +39,6 @@ class RoomManager(models.Manager):
             raise ValidationError('New users must a list and not empty.')
 
         room = Room.objects.get_room(room_id)
-
         room_users = room.users.all()
 
         for new_user in users:
@@ -54,11 +53,11 @@ class RoomManager(models.Manager):
             # Check user is not friendship
             if not Friend.objects.are_friends(request_user, new_user) and request_user != new_user:
                 raise ValidationError(
-                    f'You can not add user {new_user} because this user is not your friend.')
+                    f'You do not add user is not your friend.')
 
             # Check user is existed
             if new_user in room_users:
-                raise ValidationError('You can not add user is existed in this room.')
+                raise ValidationError('You do not add user is existed in this room.')
 
             room.users.add(new_user)
 
@@ -74,21 +73,21 @@ class RoomManager(models.Manager):
             raise ValidationError('Users must a list and not empty.')
 
         room = Room.objects.get(pk=room_id)
+        room_users = room.users.all()
 
         for user in users:
 
             # Check user is existed or not
             user = User.objects.get_user(user)
+
+            # Check user does not exist in the room
+            if user not in room_users:
+                raise ValidationError(
+                    'You do not remove user does not exist from this room.')
+
             room.users.remove(user)
 
         return room
-
-    def get_users(self, room):
-        """
-        Get users in a room
-        :param room: Room object
-        """
-        return room.users.all()
 
     def is_member(self, room, user):
         """
@@ -97,14 +96,11 @@ class RoomManager(models.Manager):
         :param user: Request user
         """
 
-        # Check room is
+        # Check room is instance or integer
         if isinstance(room, int):
-            room = Room.objects.filter(pk=room)
+            room = Room.objects.get_room(room)
 
-            if not len(room):
-                raise ValidationError('Room not found.')
-
-        return user in room[0].users.all()
+        return user in room.users.all()
 
 
 class MessageManager(models.Manager):
@@ -118,10 +114,9 @@ class MessageManager(models.Manager):
         """
 
         # Check room is exist or not
-        if not Room.objects.filter(pk=room_id).exists():
-            raise ValidationError('Can not found this room.')
+        room = Room.objects.get_room(room_id)
 
-        return Message.objects.filter(room=room_id).order_by('-created')[:constants.MESSAGE_MAXIMUM][::-1]
+        return Message.objects.filter(room=room).order_by('-created')[:constants.MESSAGE_MAXIMUM][::-1]
 
 
 class Room(models.Model):

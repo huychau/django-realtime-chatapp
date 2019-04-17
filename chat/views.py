@@ -4,7 +4,7 @@ import json
 from django.shortcuts import render
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from django.core.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from django.db import IntegrityError
@@ -55,11 +55,8 @@ class RoomViewSet(viewsets.ModelViewSet):
             serializer = RoomSerializer(room, context={'request': request})
             return Response(serializer.data)
 
-        except (ValidationError, IntegrityError) as err:
-            return Response({'error': err}, status.HTTP_400_BAD_REQUEST)
-
-        except Room.DoesNotExist as e:
-            return Response({'error': str(e)}, status.HTTP_400_BAD_REQUEST)
+        except (ValidationError, IntegrityError) as e:
+            return Response({'detail': e.detail[0]}, status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['delete'])
     def remove_users(self, request, pk=None):
@@ -74,8 +71,8 @@ class RoomViewSet(viewsets.ModelViewSet):
             serializer = RoomSerializer(room, context={'request': request})
             return Response(serializer.data)
 
-        except (ValidationError, IntegrityError) as err:
-            return Response({'users': err}, status.HTTP_400_BAD_REQUEST)
+        except (ValidationError, IntegrityError) as e:
+            return Response({'detail': e.detail[0]}, status.HTTP_400_BAD_REQUEST)
 
 
 class MessageViewSet(viewsets.ModelViewSet):
