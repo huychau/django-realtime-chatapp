@@ -186,3 +186,55 @@ class ChatAPITest(HelperAPITestCase):
         response = self.delete(
             'room-remove-users', data, self.normaluser_credentials, [self.room1.id])
         self.assertEqual(response.status_code, 200)
+
+    def test_get_messages_from_not_exist_room(self):
+        data = {
+            'room': 100
+        }
+        response = self.get(
+            'message-list', self.normaluser_credentials, None, data)
+        self.assertEqual(response.status_code, 404)
+
+    def test_get_messages_user_not_join_room(self):
+        data = {
+            'room': self.room2.id
+        }
+        response = self.get(
+            'message-list', self.normaluser_credentials, None, data)
+        self.assertEqual(response.status_code, 400)
+
+    def test_get_messages_ok(self):
+        data = {
+            'room': self.room1.id
+        }
+        response = self.get(
+            'message-list', self.normaluser_credentials, None, data)
+        self.assertEqual(response.status_code, 200)
+
+    def test_create_messages_not_join_room(self):
+        data = {
+            'room': self.room2.id,
+            'message': 'Hello'
+        }
+        response = self.post(
+            'message-list', data, self.normaluser_credentials)
+        self.assertEqual(response.status_code, 400)
+
+    def test_create_empty_messages(self):
+        data = {
+            'room': self.room1.id,
+            'message': ''
+        }
+        response = self.post(
+            'message-list', data, self.normaluser_credentials)
+        self.assertEqual(response.status_code, 400)
+
+    def test_create_messages_ok(self):
+        data = {
+            'room': self.room1.id,
+            'message': 'Hello'
+        }
+        response = self.post(
+            'message-list', data, self.normaluser_credentials)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data['message'], data['message'])

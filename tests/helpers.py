@@ -60,7 +60,6 @@ class HelperAPITestCase(APITestCase):
     def get(self, resource, credentials=None, args=None, data=None):
         """
         Helper for get API method
-        :param testcase: APITestCase
         :param resource: API resource (URL string)
         :param credentials: User credentials
         :param args: Resource detail arguments
@@ -84,7 +83,6 @@ class HelperAPITestCase(APITestCase):
     def post(self, resource, data=None, credentials=None, args=None):
         """
         Helper for post API method
-        :param testcase: APITestCase
         :param resource: API resource (URL string)
         :param credentials: User credentials
         :param args: Resource detail arguments
@@ -108,7 +106,6 @@ class HelperAPITestCase(APITestCase):
     def put(self, resource, data=None, credentials=None, args=None):
         """
         Helper for put API method
-        :param testcase: APITestCase
         :param resource: API resource (URL string)
         :param credentials: User credentials
         :param args: Resource detail arguments
@@ -132,7 +129,6 @@ class HelperAPITestCase(APITestCase):
     def delete(self, resource, data=None, credentials=None, args=None):
         """
         Helper for delete API method
-        :param testcase: APITestCase
         :param resource: API resource (URL string)
         :param credentials: User credentials
         :param args: Resource detail arguments

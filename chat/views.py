@@ -90,7 +90,9 @@ class MessageViewSet(viewsets.ModelViewSet):
         """
 
         try:
-            room_id = request.data.get('room_id')
+
+            room_id = request.data.get(
+                'room') or request.query_params.get('room')
 
             queryset = Message.objects.messages(request.user, room_id)
             page = self.paginate_queryset(queryset)
