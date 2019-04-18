@@ -10,7 +10,7 @@ services:
     env_file:
       - .env.${ENVIRONMENT}
     command: >
-      bash -c "coverage run --source='.' manage.py test
+      bash -c "coverage run --source='.' manage.py test -s
       && coverage html"
     volumes:
       - .:/code
