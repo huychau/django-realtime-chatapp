@@ -6,3 +6,4 @@ djangorestframework_simplejwt
 channels_redis
 channels
 uvicorn
+django-rest-swagger

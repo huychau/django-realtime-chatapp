@@ -17,11 +17,15 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from rest_framework_swagger.views import get_swagger_view
 from . import routers
 
 app_name = 'chatapp'
+schema_view = get_swagger_view(title='ChatApp API')
 
 urlpatterns = [
+
+    path('docs/', schema_view),
 
     # Admin
     path('admin/', admin.site.urls),
