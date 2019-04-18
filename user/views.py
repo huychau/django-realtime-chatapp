@@ -189,12 +189,16 @@ def login(request):
     user.is_online = True
     user.save()
 
+    # Get user profile
+    profile = Profile.objects.get(user=user)
+
     # Serializer user to response
-    serializer = UserSerializer(user, context={'request': request})
+    serializer = ProfileSerializer(profile, context={'request': request})
+
     data = {
         'refresh': str(token),
         'access': str(token.access_token),
-        'user': serializer.data
+        'profile': serializer.data
     }
 
     return Response(data, status=status.HTTP_200_OK)
