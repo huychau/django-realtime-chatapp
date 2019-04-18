@@ -10,6 +10,7 @@ from rest_framework.decorators import action, api_view, permission_classes, list
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import ValidationError
+from rest_framework.filters import SearchFilter
 from rest_framework_simplejwt.tokens import RefreshToken
 from auth.permissions import (
     IsAdminOrIsSelf,
@@ -37,6 +38,8 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = (IsSelfOrAdminUpdateDeleteOnly,
                           IsAuthenticatedReadOnly,)
+    filter_backends = (SearchFilter,)
+    search_fields = ('username',)
     ordering = ('-id',)
 
     @action(detail=True, methods=['put'],
@@ -88,6 +91,8 @@ class FriendViewSet(viewsets.ModelViewSet):
     queryset = ''
     serializer_class = FriendSerializer
     permission_classes = (IsAuthenticated, IsSelfOrAdminUpdateDeleteOnly,)
+    filter_backends = (SearchFilter,)
+    search_fields = ('username',)
     ordering = ('-id',)
 
     def list(self, request):
@@ -95,6 +100,7 @@ class FriendViewSet(viewsets.ModelViewSet):
         Get friends
         """
         queryset = Friend.objects.friends(request.user)
+        queryset = self.filter_queryset(queryset)
         page = self.paginate_queryset(queryset)
         serializer = UserSerializer(
             page, many=True, context={'request': request})

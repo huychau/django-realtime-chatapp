@@ -1,12 +1,12 @@
 from django.utils.safestring import mark_safe
 from django.contrib.auth.decorators import login_required
-import json
 from django.shortcuts import render
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.filters import SearchFilter
 from django.db import IntegrityError
 from rest_framework import serializers
 from auth.permissions import (
@@ -25,12 +25,15 @@ class RoomViewSet(viewsets.ModelViewSet):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
     permission_classes = (IsAuthenticated, IsSelfOrAdminUpdateDeleteOnly)
+    filter_backends = (SearchFilter,)
+    search_fields = ('name',)
 
     def list(self, request):
         """
         Get rooms
         """
         queryset = Room.objects.rooms(user=request.user)
+        queryset = self.filter_queryset(queryset)
         page = self.paginate_queryset(queryset)
         serializer = RoomSerializer(
             page, many=True, context={'request': request})
@@ -83,6 +86,8 @@ class MessageViewSet(viewsets.ModelViewSet):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
     permission_classes = (IsAuthenticated,)
+    filter_backends = (SearchFilter,)
+    search_fields = ('message', 'subject')
 
     def list(self, request):
         """
@@ -95,6 +100,7 @@ class MessageViewSet(viewsets.ModelViewSet):
                 'room') or request.query_params.get('room')
 
             queryset = Message.objects.messages(request.user, room_id)
+            queryset = self.filter_queryset(queryset)
             page = self.paginate_queryset(queryset)
             serializer = MessageSerializer(
                 page, many=True, context={'request': request})
