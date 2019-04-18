@@ -108,7 +108,7 @@ class MessageManager(models.Manager):
     Message manager
     """
 
-    def messages(self, user, room_id, length=None):
+    def messages(self, user, room_id):
         """
         Get last messages
         """

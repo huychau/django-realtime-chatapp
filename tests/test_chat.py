@@ -1,14 +1,16 @@
 from rest_framework.test import APITestCase
 from chat.models import Room, Message
 from user.models import Friend, User
-from .helpers import TestAPI
-
-test_api = TestAPI()
+from .helpers import HelperAPITestCase
 
 
-class ChatAPITest(APITestCase):
+class ChatAPITest(HelperAPITestCase):
+    """
+    Chat test cases
+    """
+
     def setUp(self):
-        test_api.set_up(self)
+        super(ChatAPITest, self).setUp()
 
         self.user2 = User.objects.create_user(
             'user2', 'user2@project.com', 'password')
@@ -21,11 +23,24 @@ class ChatAPITest(APITestCase):
             name='Test Room 1'
         )
 
+        self.room2 = Room.objects.create(
+            user=self.superuser,
+            label='test-room-2',
+            name='Test Room 2'
+        )
+
         self.room1.users.add(self.normaluser, self.superuser)
+        self.room2.users.add(self.user2, self.superuser)
 
         self.message = Message.objects.create(
             room=self.room1,
             user=self.normaluser,
+            message='Hello'
+        )
+
+        self.message = Message.objects.create(
+            room=self.room2,
+            user=self.user2,
             message='Hello'
         )
 
@@ -41,19 +56,19 @@ class ChatAPITest(APITestCase):
         self.assertEqual(str(message), f'Message from {message.user}')
 
     def test_get_room_list_ok(self):
-        response = test_api.get(self, 'room-list', self.normaluser_credentials)
+        response = self.get('room-list', self.normaluser_credentials)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data['results']), 1)
 
     def test_create_new_room_forbibden(self):
-        response = test_api.post(self, 'room-list', {})
+        response = self.post('room-list', {})
 
         self.assertEqual(response.status_code, 403)
 
     def test_create_new_room_empty_fields(self):
-        response = test_api.post(
-            self, 'room-list', {}, self.normaluser_credentials)
+        response = self.post(
+            'room-list', {}, self.normaluser_credentials)
 
         self.assertEqual(response.status_code, 400)
 
@@ -63,8 +78,8 @@ class ChatAPITest(APITestCase):
             'label': 'test-room-1',
             'users': []
         }
-        response = test_api.post(
-            self, 'room-list', data, self.normaluser_credentials)
+        response = self.post(
+            'room-list', data, self.normaluser_credentials)
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data['name'][0],
@@ -81,16 +96,16 @@ class ChatAPITest(APITestCase):
             'users': [self.user2.id]
         }
 
-        response = test_api.post(
-            self, 'room-list', data, self.normaluser_credentials)
+        response = self.post(
+            'room-list', data, self.normaluser_credentials)
         self.assertEqual(response.status_code, 201)
 
     def test_add_empty_user_to_room(self):
         data = {
             'users': ''
         }
-        response = test_api.post(
-            self, 'room-add-users', data, self.normaluser_credentials, [self.room1.id])
+        response = self.post(
+            'room-add-users', data, self.normaluser_credentials, [self.room1.id])
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data['detail'],
                          'New users must a list and not empty.')
@@ -100,8 +115,8 @@ class ChatAPITest(APITestCase):
         data = {
             'users': [self.user3.id]
         }
-        response = test_api.post(
-            self, 'room-add-users', data, self.normaluser_credentials, [100])
+        response = self.post(
+            'room-add-users', data, self.normaluser_credentials, [100])
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.data['detail'],
                          'Room matching query does not exist.')
@@ -110,8 +125,8 @@ class ChatAPITest(APITestCase):
         data = {
             'users': [self.user3.id]
         }
-        response = test_api.post(
-            self, 'room-add-users', data, self.normaluser_credentials, [self.room1.id])
+        response = self.post(
+            'room-add-users', data, self.normaluser_credentials, [self.room1.id])
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data['detail'],
                          'You do not add user is not your friend.')
@@ -120,8 +135,8 @@ class ChatAPITest(APITestCase):
         data = {
             'users': [self.superuser.id]
         }
-        response = test_api.post(
-            self, 'room-add-users', data, self.normaluser_credentials, [self.room1.id])
+        response = self.post(
+            'room-add-users', data, self.normaluser_credentials, [self.room1.id])
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data['detail'],
                          'You do not add user is existed in this room.')
@@ -130,16 +145,16 @@ class ChatAPITest(APITestCase):
         data = {
             'users': [self.user2.id]
         }
-        response = test_api.post(
-            self, 'room-add-users', data, self.normaluser_credentials, [self.room1.id])
+        response = self.post(
+            'room-add-users', data, self.normaluser_credentials, [self.room1.id])
         self.assertEqual(response.status_code, 200)
 
     def test_remove_user_from_not_exist_room(self):
         data = {
             'users': []
         }
-        response = test_api.delete(
-            self, 'room-remove-users', data, self.normaluser_credentials, [100])
+        response = self.delete(
+            'room-remove-users', data, self.normaluser_credentials, [100])
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data['detail'],
                          'Users must a list and not empty.')
@@ -148,8 +163,8 @@ class ChatAPITest(APITestCase):
         data = {
             'users': []
         }
-        response = test_api.delete(
-            self, 'room-remove-users', data, self.normaluser_credentials, [self.room1.id])
+        response = self.delete(
+            'room-remove-users', data, self.normaluser_credentials, [self.room1.id])
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data['detail'],
                          'Users must a list and not empty.')
@@ -158,8 +173,8 @@ class ChatAPITest(APITestCase):
         data = {
             'users': [self.user3.id]
         }
-        response = test_api.delete(
-            self, 'room-remove-users', data, self.normaluser_credentials, [self.room1.id])
+        response = self.delete(
+            'room-remove-users', data, self.normaluser_credentials, [self.room1.id])
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data['detail'],
                          'You do not remove user does not exist from this room.')
@@ -168,6 +183,6 @@ class ChatAPITest(APITestCase):
         data = {
             'users': [self.superuser.id]
         }
-        response = test_api.delete(
-            self, 'room-remove-users', data, self.normaluser_credentials, [self.room1.id])
+        response = self.delete(
+            'room-remove-users', data, self.normaluser_credentials, [self.room1.id])
         self.assertEqual(response.status_code, 200)

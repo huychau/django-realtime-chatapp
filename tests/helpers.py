@@ -1,52 +1,53 @@
 from django.urls import reverse
+from rest_framework.test import APITestCase
 from user.models import User
 
 
-class TestAPI():
+class HelperAPITestCase(APITestCase):
 
-    def set_up(self, testcase):
+    def setUp(self):
         """
         Set up new normal and super users
         """
 
-        testcase.superuser_credentials = {
+        self.superuser_credentials = {
             'username': 'admin',
             'password': 'password'
         }
 
-        testcase.normaluser_credentials = {
+        self.normaluser_credentials = {
             'username': 'user',
             'password': 'password'
         }
 
         # Create superuser
-        testcase.superuser = User.objects.create_superuser(
-            testcase.superuser_credentials['username'],
+        self.superuser = User.objects.create_superuser(
+            self.superuser_credentials['username'],
             'admin@myproject.com',
-            testcase.superuser_credentials['password'],
+            self.superuser_credentials['password'],
         )
 
         # Create normal user
-        testcase.normaluser = User.objects.create_user(
-            testcase.normaluser_credentials['username'],
+        self.normaluser = User.objects.create_user(
+            self.normaluser_credentials['username'],
             'user@myproject.com',
-            testcase.normaluser_credentials['password']
+            self.normaluser_credentials['password']
         )
 
-    def login(self, testcase, credentials=None):
+    def login(self, credentials=None):
         url = reverse('login')
-        return testcase.client.post(
+        return self.client.post(
             url,
             credentials,
             format='json'
         )
 
-    def get_access_token(self, testcase, credentials=None):
+    def get_access_token(self, credentials=None):
 
         if credentials:
-            response = self.login(testcase, credentials)
+            response = self.login(credentials)
 
-            testcase.assertEqual(response.status_code, 200)
+            self.assertEqual(response.status_code, 200)
 
             return 'Bearer {}'.format(response.data['access'])
 
@@ -56,7 +57,7 @@ class TestAPI():
         }
 
 
-    def get(self, testcase, resource, credentials=None, args=None, results_len=None):
+    def get(self, resource, credentials=None, args=None, data=None):
         """
         Helper for get API method
         :param testcase: APITestCase
@@ -71,15 +72,16 @@ class TestAPI():
         headers = {}
         if credentials:
             headers = self.get_headers(
-                self.get_access_token(testcase, credentials))
+                self.get_access_token(credentials))
 
-        return testcase.client.get(
+        return self.client.get(
             url,
+            data=data,
             format='json',
             **headers
         )
 
-    def post(self, testcase, resource, data=None, credentials=None, args=None):
+    def post(self, resource, data=None, credentials=None, args=None):
         """
         Helper for post API method
         :param testcase: APITestCase
@@ -94,16 +96,16 @@ class TestAPI():
         headers = {}
         if credentials:
             headers = self.get_headers(
-                self.get_access_token(testcase, credentials))
+                self.get_access_token(credentials))
 
-        return testcase.client.post(
+        return self.client.post(
             url,
             data,
             format='json',
             **headers
         )
 
-    def put(self, testcase, resource, data=None, credentials=None, args=None):
+    def put(self, resource, data=None, credentials=None, args=None):
         """
         Helper for put API method
         :param testcase: APITestCase
@@ -118,16 +120,16 @@ class TestAPI():
         headers = {}
         if credentials:
             headers = self.get_headers(
-                self.get_access_token(testcase, credentials))
+                self.get_access_token(credentials))
 
-        return testcase.client.put(
+        return self.client.put(
             url,
             data,
             format='json',
             **headers
         )
 
-    def delete(self, testcase, resource, data=None, credentials=None, args=None):
+    def delete(self, resource, data=None, credentials=None, args=None):
         """
         Helper for delete API method
         :param testcase: APITestCase
@@ -142,9 +144,9 @@ class TestAPI():
         headers = {}
         if credentials:
             headers = self.get_headers(
-                self.get_access_token(testcase, credentials))
+                self.get_access_token(credentials))
 
-        return testcase.client.delete(
+        return self.client.delete(
             url,
             data,
             format='json',
