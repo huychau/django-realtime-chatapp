@@ -124,11 +124,7 @@ class ChatConsumer(WebsocketConsumer):
                 message=data['message'],
                 room=self.room)
 
-            print(message)
-
             message_serializer = self.json_serialize([message, ])
-
-            print(message_serializer)
 
             content = {
                 'command': 'new_message',
