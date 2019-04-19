@@ -1,4 +1,6 @@
 from django.db import models
+import datetime
+from django.utils import timezone
 from rest_framework.exceptions import ValidationError, NotFound
 from django.shortcuts import get_object_or_404
 from user.models import User, Friend
@@ -25,7 +27,7 @@ class RoomManager(models.Manager):
         Get the rooms user created or joined
         """
 
-        return Room.objects.filter(users__id__exact=user.id)
+        return Room.objects.filter(users__id__exact=user.id).order_by('-updated')
 
 
     def add_users(self, request_user, room_id, users):
@@ -102,6 +104,15 @@ class RoomManager(models.Manager):
 
         return user in room.users.all()
 
+    def set_latest_message(self, room, message):
+        room = Room.objects.get_room(room.id)
+        room.latest_message = message
+        room.updated = datetime.datetime.now(tz=timezone.utc)
+        room.save()
+
+        print(room.__dict__)
+
+
 
 class MessageManager(models.Manager):
     """
@@ -133,6 +144,8 @@ class Room(models.Model):
         User, on_delete=models.CASCADE, related_name='room_creator')
     users = models.ManyToManyField(User, related_name='room_users', default=user)
     created = models.DateTimeField(auto_now_add=True, editable=False)
+    updated = models.DateTimeField(default=datetime.datetime.now, editable=True)
+    latest_message = models.TextField(blank=True)
 
     objects = RoomManager()
 
@@ -162,3 +175,7 @@ class Message(models.Model):
 
     def __str__(self):
         return f'Message from {self.user}'
+
+    def save(self, *args, **kwargs):
+        Room.objects.set_latest_message(self.room, self.message)
+        super(Message, self).save(*args, **kwargs)
