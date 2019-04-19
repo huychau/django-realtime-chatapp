@@ -128,7 +128,6 @@ def index(request):
 def room(request, room):
 
     # Get all user rooms
-    rooms = Room.objects.rooms(request.user)
-    rooms_serialize = json.loads(serializers.serialize('json', rooms))
+    rooms = list(Room.objects.rooms(request.user).values())
 
-    return render(request, 'chat/room.html', {'rooms': mark_safe(rooms_serialize)})
+    return render(request, 'chat/room.html', {'rooms': rooms})

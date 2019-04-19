@@ -3,7 +3,7 @@
 <html class=''>
   <head>
     <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-    <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    {% comment %} <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script> {% endcomment %}
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <meta charset='UTF-8'>
     <meta name="robots" content="noindex">
@@ -19,41 +19,8 @@
           <div class="wrap">
             <img id="profile-img" src="http://emilcarlsson.se/assets/mikeross.png" class="online" alt="" />
             <p>{{ user }}</p>
-            <i class="fa fa-chevron-down expand-button" aria-hidden="true"></i>
-            <div id="status-options">
-              <ul>
-                <li id="status-online" class="active">
-                  <span class="status-circle"></span>
-                  <p>Online</p>
-                </li>
-                <li id="status-away">
-                  <span class="status-circle"></span>
-                  <p>Away</p>
-                </li>
-                <li id="status-busy">
-                  <span class="status-circle"></span>
-                  <p>Busy</p>
-                </li>
-                <li id="status-offline">
-                  <span class="status-circle"></span>
-                  <p>Offline</p>
-                </li>
-              </ul>
-            </div>
-            <div id="expanded">
-              <label for="twitter">
-              <i class="fa fa-facebook fa-fw" aria-hidden="true"></i>
-              </label>
-              <input name="twitter" type="text" value="mikeross" />
-              <label for="twitter">
-              <i class="fa fa-twitter fa-fw" aria-hidden="true"></i>
-              </label>
-              <input name="twitter" type="text" value="ross81" />
-              <label for="twitter">
-              <i class="fa fa-instagram fa-fw" aria-hidden="true"></i>
-              </label>
-              <input name="twitter" type="text" value="mike.ross" />
-            </div>
+            <a href="/api-auth/logout/?next=/chat/" class="expand-button" style="color: #fff; float: right;">Logout</a>
+
           </div>
         </div>
         <div id="search">
@@ -64,108 +31,17 @@
         </div>
         <div id="contacts">
           <ul>
-            <li class="contact">
+          {% for room in rooms %}
+            <li class="contact" onclick="changeRoom({{room.id}})">
               <div class="wrap">
-                <span class="contact-status online"></span>
-                <img src="http://emilcarlsson.se/assets/louislitt.png" alt="" />
+                <img src="https://www.appiyus.com/wp-content/uploads/2016/04/chat-2-icon.png" alt="" />
                 <div class="meta">
-                  <p class="name">Louis Litt</p>
-                  <p class="preview">You just got LITT up, Mike.</p>
+                  <p class="name">{{ room.name }}</p>
+                  <p class="preview">{{ room.latest_message }}</p>
                 </div>
               </div>
             </li>
-            <li class="contact active">
-              <div class="wrap">
-                <span class="contact-status busy"></span>
-                <img src="http://emilcarlsson.se/assets/harveyspecter.png" alt="" />
-                <div class="meta">
-                  <p class="name">Harvey Specter</p>
-                  <p class="preview">Wrong. You take the gun, or you pull out a bigger one. Or, you call their bluff. Or, you do any one of a hundred and forty six other things.</p>
-                </div>
-              </div>
-            </li>
-            <li class="contact">
-              <div class="wrap">
-                <span class="contact-status away"></span>
-                <img src="http://emilcarlsson.se/assets/rachelzane.png" alt="" />
-                <div class="meta">
-                  <p class="name">Rachel Zane</p>
-                  <p class="preview">I was thinking that we could have chicken tonight, sounds good?</p>
-                </div>
-              </div>
-            </li>
-            <li class="contact">
-              <div class="wrap">
-                <span class="contact-status online"></span>
-                <img src="http://emilcarlsson.se/assets/donnapaulsen.png" alt="" />
-                <div class="meta">
-                  <p class="name">Donna Paulsen</p>
-                  <p class="preview">Mike, I know everything! I'm Donna..</p>
-                </div>
-              </div>
-            </li>
-            <li class="contact">
-              <div class="wrap">
-                <span class="contact-status busy"></span>
-                <img src="http://emilcarlsson.se/assets/jessicapearson.png" alt="" />
-                <div class="meta">
-                  <p class="name">Jessica Pearson</p>
-                  <p class="preview">Have you finished the draft on the Hinsenburg deal?</p>
-                </div>
-              </div>
-            </li>
-            <li class="contact">
-              <div class="wrap">
-                <span class="contact-status"></span>
-                <img src="http://emilcarlsson.se/assets/haroldgunderson.png" alt="" />
-                <div class="meta">
-                  <p class="name">Harold Gunderson</p>
-                  <p class="preview">Thanks Mike! :)</p>
-                </div>
-              </div>
-            </li>
-            <li class="contact">
-              <div class="wrap">
-                <span class="contact-status"></span>
-                <img src="http://emilcarlsson.se/assets/danielhardman.png" alt="" />
-                <div class="meta">
-                  <p class="name">Daniel Hardman</p>
-                  <p class="preview">We'll meet again, Mike. Tell Jessica I said 'Hi'.</p>
-                </div>
-              </div>
-            </li>
-            <li class="contact">
-              <div class="wrap">
-                <span class="contact-status busy"></span>
-                <img src="http://emilcarlsson.se/assets/katrinabennett.png" alt="" />
-                <div class="meta">
-                  <p class="name">Katrina Bennett</p>
-                  <p class="preview">I've sent you the files for the Garrett trial.</p>
-                </div>
-              </div>
-            </li>
-            <li class="contact">
-              <div class="wrap">
-                <span class="contact-status"></span>
-                <img src="http://emilcarlsson.se/assets/charlesforstman.png" alt="" />
-                <div class="meta">
-                  <p class="name">Charles Forstman</p>
-                  <p class="preview">Mike, this isn't over.</p>
-                </div>
-              </div>
-            </li>
-            <li class="contact">
-              <div class="wrap">
-                <span class="contact-status"></span>
-                <img src="http://emilcarlsson.se/assets/jonathansidwell.png" alt="" />
-                <div class="meta">
-                  <p class="name">Jonathan Sidwell</p>
-                  <p class="preview">
-                    <span>You:</span> That's bullshit. This deal is solid.
-                  </p>
-                </div>
-              </div>
-            </li>
+          {% endfor %}
           </ul>
         </div>
         <div id="bottom-bar">
@@ -181,20 +57,15 @@
       </div>
       <div class="content">
         <div class="contact-profile">
-          <img src="http://emilcarlsson.se/assets/harveyspecter.png" alt="" />
-          <p>Harvey Specter</p>
-          <div class="social-media">
-            <i class="fa fa-facebook" aria-hidden="true"></i>
-            <i class="fa fa-twitter" aria-hidden="true"></i>
-            <i class="fa fa-instagram" aria-hidden="true"></i>
-          </div>
+          <img src="https://www.appiyus.com/wp-content/uploads/2016/04/chat-2-icon.png" alt="" />
+          <p id="room-name"></p>
         </div>
         <div class="messages">
           <ul id="chat-logs">
           </ul>
         </div>
         <div class="message-input">
-          <div class="wrap">
+          <div class="wrap" id="wrap-message">
             <input id="chat-message-input" type="text" placeholder="Write your message..." />
             <i class="fa fa-paperclip attachment" aria-hidden="true"></i>
             <button id="chat-message-submit" class="submit">
@@ -215,6 +86,7 @@
       var userId = '{{user.id}}'
       var room = {};
       var roomUsers = [];
+      var rooms = '{{rooms}}';
 
       chatSocket.onopen = function(e) {
         fetchData();
@@ -222,19 +94,32 @@
 
       chatSocket.onmessage = function(e) {
         var data = JSON.parse(e.data);
+        var command = data.command;
+        var message = data.message;
 
-        if (data['command'] === 'fetch_data') {
+        console.log(data);
+
+        if (command === 'fetch_data') {
 
           room = data.room.fields;
           roomUsers = data.room_users;
 
-          for (let i = 0; i < data['messages'].length; i++) {
+          var roomUserText = '';
+
+          for (let i = 0; i < roomUsers.length; i++) {
+            roomUserText += roomUsers[i].fields.username + ((i < roomUsers.length - 1) ? ' | ' : '');
+          }
+
+          // Update room name
+          $('#room-name').text(room.name + ' - ' + roomUserText)
+
+          for (let i = 0; i < data.messages.length; i++) {
             createMessage(data['messages'][i]);
           }
-        } else if (data['command'] === 'new_message'){
-          createMessage(data['message']);
-        } else {
-          alert('Error: ' + data['message']);
+        } else if (command === 'new_message') {
+          createMessage(message);
+        } else if (command === 'error_message') {
+          alert('Error: ' + message);
         }
       };
 
@@ -249,8 +134,8 @@
       };
 
       document.querySelector('#chat-message-submit').onclick = function(e) {
-        var messageInputDom = document.getElementById('chat-message-input');
-        var message = messageInputDom.value.trim();
+        var messageInputDom = $('#chat-message-input');
+        var message = messageInputDom.val() && messageInputDom.val().trim();
 
         if (message) {
           chatSocket.send(JSON.stringify({
@@ -258,7 +143,7 @@
             'message': message
           }));
 
-          messageInputDom.value = '';
+          messageInputDom.val('');
         }
       };
 
@@ -276,8 +161,7 @@
         var imgTag = document.createElement('img');
         var msgTag = document.createElement('p');
         var usernameTag = document.createElement('span');
-
-        usernameTag.textContent = author_id;
+        usernameTag.textContent = data.user.username;
         msgTag.textContent = data.message;
         imgTag.src = 'https://png.pngtree.com/svg/20161027/631929649c.svg';
 
@@ -288,11 +172,16 @@
         }
 
         msgListTag.appendChild(imgTag);
-        // msgListTag.appendChild(usernameTag);
+        msgListTag.appendChild(usernameTag);
         msgListTag.appendChild(msgTag);
         document.querySelector('#chat-logs').appendChild(msgListTag);
       }
-        //# sourceURL=pen.js
+
+      function changeRoom(room) {
+        var href = window.location.origin + '/chat/' + room ;
+        window.location.href = href;
+      }
+
     </script>
   </body>
 </html>

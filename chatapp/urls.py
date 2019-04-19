@@ -25,7 +25,7 @@ schema_view = get_swagger_view(title='ChatApp API')
 
 urlpatterns = [
 
-    path('docs/', schema_view),
+    path('', schema_view),
 
     # Admin
     path('admin/', admin.site.urls),

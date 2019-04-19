@@ -20,6 +20,8 @@ class RoomSerializer(serializers.ModelSerializer):
             'user',
             'users',
             'url',
+            'updated',
+            'latest_message'
         )
 
         extra_kwargs = {

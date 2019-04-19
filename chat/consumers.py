@@ -2,11 +2,11 @@ from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 import json
 import asyncio
-from django.core.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, NotFound
 from chatapp.constants import CHAT_ROOM_PREFIX
 from .views import MessageViewSet
 from .models import Message, Room
-# from .serializers import RoomSerializer
+from chatapp import constants
 from django.core import serializers
 
 
@@ -32,13 +32,13 @@ class ChatConsumer(WebsocketConsumer):
         self.room_group_name = f'{CHAT_ROOM_PREFIX}{self.room_id}'
 
         try:
-            self.room = Room.objects.get(pk=self.room_id)
+            self.room = Room.objects.get_room(pk=self.room_id)
             self.room_users = self.room.users.all()
 
             if self.user not in self.room_users:
                 self.send_error_message('User is not in this room.')
 
-        except (ValidationError, Room.DoesNotExist) as e:
+        except (ValidationError, NotFound) as e:
             self.send_error_message(str(e))
 
     def connect(self):
@@ -90,7 +90,8 @@ class ChatConsumer(WebsocketConsumer):
         try:
 
             # Get messages form a room
-            messages = Message.objects.last_messages(self.room.id)
+            messages = Message.objects.messages(self.user,
+                self.room.id)[:constants.MESSAGE_MAXIMUM][::-1]
 
             # Something for client
             room_serializer = self.json_serialize([self.room, ])
@@ -106,8 +107,8 @@ class ChatConsumer(WebsocketConsumer):
 
             self.send_message(content)
 
-        except ValidationError as e:
-            return self.send_error_message(str(e))
+        except (ValidationError, AttributeError) as e:
+            return self.send_error_message('Room matching query does not exist.')
 
     def new_message(self, data):
         """
@@ -123,7 +124,11 @@ class ChatConsumer(WebsocketConsumer):
                 message=data['message'],
                 room=self.room)
 
+            print(message)
+
             message_serializer = self.json_serialize([message, ])
+
+            print(message_serializer)
 
             content = {
                 'command': 'new_message',
@@ -160,7 +165,7 @@ class ChatConsumer(WebsocketConsumer):
 
     def send_message(self, message):
         """
-        Hander for message
+        Handler for message
         """
         self.send(text_data=json.dumps(message))
 
@@ -180,6 +185,7 @@ class ChatConsumer(WebsocketConsumer):
         """
         Send message to channel
         """
+
         message = event['message']
         self.send(text_data=json.dumps(message))
 
@@ -187,5 +193,5 @@ class ChatConsumer(WebsocketConsumer):
     commands = {
         'fetch_data': fetch_data,
         'new_message': new_message,
-        'error_message': error_message,
+        'error_message': error_message
     }
