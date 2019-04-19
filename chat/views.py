@@ -1,6 +1,7 @@
 from django.utils.safestring import mark_safe
+import json
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
@@ -8,7 +9,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import SearchFilter
 from django.db import IntegrityError
-from rest_framework import serializers
+from django.core import serializers
 from auth.permissions import (
     IsAdminOrIsSelf,
     IsSelfOrAdminUpdateDeleteOnly,
@@ -117,9 +118,17 @@ class MessageViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 
+@login_required
 def index(request):
-    return render(request, 'chat/index.html', {})
+    # Get the last active room
+    room = Room.objects.rooms(request.user)[0]
+    return redirect('room', room=room.id)
 
 @login_required
 def room(request, room):
-    return render(request, 'chat/room.html', {})
+
+    # Get all user rooms
+    rooms = Room.objects.rooms(request.user)
+    rooms_serialize = json.loads(serializers.serialize('json', rooms))
+
+    return render(request, 'chat/room.html', {'rooms': mark_safe(rooms_serialize)})
