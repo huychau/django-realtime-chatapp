@@ -6,6 +6,7 @@ from rest_framework.exceptions import ValidationError, NotFound
 from chatapp.constants import CHAT_ROOM_PREFIX
 from .views import MessageViewSet
 from .models import Message, Room
+from .serializers import MessageSerializer
 from chatapp import constants
 from django.core import serializers
 
@@ -93,14 +94,13 @@ class ChatConsumer(WebsocketConsumer):
             messages = Message.objects.messages(self.user,
                 self.room.id)[:constants.MESSAGE_MAXIMUM][::-1]
 
-            # Something for client
+            messages_serializer = MessageSerializer(messages, many=True)
             room_serializer = self.json_serialize([self.room, ])
             users_serializer = self.json_serialize(self.room_users)
-            messages_serializer = self.json_serialize(messages)
 
             content = {
                 'command': 'fetch_data',
-                'messages': messages_serializer,
+                'messages': list(messages_serializer.data),
                 'room': room_serializer[0],
                 'room_users': users_serializer
             }
@@ -124,11 +124,11 @@ class ChatConsumer(WebsocketConsumer):
                 message=data['message'],
                 room=self.room)
 
-            message_serializer = self.json_serialize([message, ])
+            message_serializer = MessageSerializer(message, many=False)
 
             content = {
                 'command': 'new_message',
-                'message': message_serializer[0]
+                'message': message_serializer.data
             }
             return self.send_chat_message(content)
         else:

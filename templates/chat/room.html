@@ -99,8 +99,6 @@
         var command = data.command;
         var message = data.message;
 
-        console.log(data);
-
         if (command === 'fetch_data') {
 
           room = data.room.fields;
@@ -157,22 +155,19 @@
 
       function createMessage(data) {
 
-        // Format data
-        data = data.fields
-
-        var author_id = data.user;
         var msgListTag = document.createElement('li');
         var imgTag = document.createElement('img');
         var msgTag = document.createElement('p');
         var usernameTag = document.createElement('span');
-        usernameTag.textContent = data.user.username;
+
         msgTag.textContent = data.message;
         imgTag.src = 'https://png.pngtree.com/svg/20161027/631929649c.svg';
 
-        if (Number(author_id) === Number(userId)) {
+        if (Number(data.user.id) === Number(userId)) {
           msgListTag.className = 'sent';
         } else {
           msgListTag.className = 'replies';
+          usernameTag.textContent = data.user.full_name || data.user.username;
         }
 
         msgListTag.appendChild(imgTag);
