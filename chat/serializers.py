@@ -77,7 +77,8 @@ class UserInMessageSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             'id',
-            'username'
+            'username',
+            'full_name'
         )
 
 

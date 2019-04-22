@@ -60,14 +60,16 @@
           <img src="https://www.appiyus.com/wp-content/uploads/2016/04/chat-2-icon.png" alt="" />
           <p id="room-name"></p>
         </div>
-        <div class="messages">
+        <div class="messages" id="messages-wrap">
           <ul id="chat-logs">
           </ul>
         </div>
         <div class="message-input">
           <div class="wrap" id="wrap-message">
             <input id="chat-message-input" type="text" placeholder="Write your message..." />
-            <i class="fa fa-paperclip attachment" aria-hidden="true"></i>
+            <i class="fa fa-paperclip attachment" aria-hidden="true" onclick="openFileUpload('file-upload');"></i>
+            <input type="file" id="file-upload" style="display:none">
+
             <button id="chat-message-submit" class="submit">
             <i class="fa fa-paper-plane" aria-hidden="true"></i>
             </button>
@@ -144,6 +146,8 @@
           }));
 
           messageInputDom.val('');
+
+          messagesScroll();
         }
       };
 
@@ -181,6 +185,21 @@
         var href = window.location.origin + '/chat/' + room ;
         window.location.href = href;
       }
+
+      function messagesScroll() {
+        $('#messages-wrap').animate({ scrollTop: $('#messages-wrap').prop('scrollHeight')}, 1000);
+      }
+
+      function openFileUpload(file) {
+        $('#file-upload').click();
+      }
+
+      $(function() {
+        setTimeout(function() {
+          messagesScroll();
+        }, 100)
+
+      });
 
     </script>
   </body>

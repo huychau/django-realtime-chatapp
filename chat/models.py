@@ -110,9 +110,6 @@ class RoomManager(models.Manager):
         room.updated = datetime.datetime.now(tz=timezone.utc)
         room.save()
 
-        print(room.__dict__)
-
-
 
 class MessageManager(models.Manager):
     """
@@ -130,7 +127,7 @@ class MessageManager(models.Manager):
         if user not in room.users.all():
             raise ValidationError('You do not get messages from the room you are not joined.')
 
-        return Message.objects.filter(room=room).order_by('-created')
+        return Message.objects.select_related().filter(room=room).order_by('-created')
 
 
 class Room(models.Model):
