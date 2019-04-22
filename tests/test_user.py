@@ -6,12 +6,14 @@ from .helpers import HelperAPITestCase
 class UserAPITest(HelperAPITestCase):
 
     def test_string_representation(self):
+
         user = User.objects.get(pk=1)
-        self.assertEqual(str(user), user.username)
+        full_name = user.get_full_name() == '' and user.username or user.get_full_name()
+        self.assertEqual(str(user), full_name)
 
         profile = Profile.objects.get(pk=1)
-        full_name = f'{profile.first_name} {profile.last_name}'.strip()
-        self.assertEqual(str(profile), full_name)
+
+        self.assertEqual(str(profile), profile.user.username)
 
 
     # REGISTRATION RESOURCES

@@ -22,6 +22,9 @@ class UserManager(AbstractUserManager):
         except User.DoesNotExist as e:
             raise NotFound(e)
 
+    def get_full_name(self):
+        return f'{self.first_name} {self.last_name}'.strip()
+
 
 class FriendshipManager(models.Manager):
     """
@@ -102,6 +105,8 @@ class User(AbstractUser):
         _('username'), unique=True, max_length=50, validators=[MinLengthValidator(2),])
     password = models.CharField(_('password'), max_length=128)
     email = models.EmailField(_('email address'), unique=True)
+    first_name = models.CharField(max_length=50, blank=True)
+    last_name = models.CharField(max_length=50, blank=True)
     is_online = models.BooleanField(default=False)
 
     objects = UserManager()
@@ -110,21 +115,23 @@ class User(AbstractUser):
         ordering = ('-id',)
 
     def __str__(self):
-        return self.username
+        return self.get_full_name() == '' and self.username or self.get_full_name()
+
+    @property
+    def full_name(self):
+        return self.get_full_name()
 
 
 class Profile(models.Model):
     created = models.DateTimeField(auto_now_add=True, editable=False)
     user = models.OneToOneField(settings.base.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile', unique=True)
-    first_name = models.CharField(max_length=50, blank=True)
-    last_name = models.CharField(max_length=50, blank=True)
     birth_date = models.DateField(null=True, blank=True)
     phone = models.CharField(max_length=15, blank=True)
     bio = models.TextField(max_length=500, blank=True)
     address = models.CharField(max_length=100, blank=True)
 
     def __str__(self):
-        return f'{self.first_name} {self.last_name}'.strip()
+        return self.user.username
 
     class Meta:
         ordering = ('-id',)

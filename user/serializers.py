@@ -18,6 +18,8 @@ class UserSerializer(serializers.ModelSerializer):
             'url',
             'username',
             'email',
+            'first_name',
+            'last_name',
             'is_online'
         )
 
@@ -73,8 +75,6 @@ class ProfileSerializer(serializers.ModelSerializer):
             'id',
             'url',
             'user',
-            'first_name',
-            'last_name',
             'phone',
             'bio',
             'birth_date',
