@@ -12,8 +12,10 @@ services:
     command: >
       bash -c "coverage run --source='.' manage.py test -s
       && coverage html
-      && python3 -m http.server 9999"
+      && cd htmlcov/
+      && python3 -m http.server 8002 --bind 0.0.0.0"
     volumes:
       - .:/code
     ports:
       - 8001:8001
+      - 8002:8002
