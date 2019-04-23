@@ -75,6 +75,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             'id',
             'url',
             'user',
+            'avatar',
             'phone',
             'bio',
             'birth_date',

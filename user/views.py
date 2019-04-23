@@ -5,7 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from rest_framework import viewsets, status
-from rest_framework.decorators import action, api_view, permission_classes, list_route
+from rest_framework.decorators import action, api_view, permission_classes, list_route, detail_route
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import ValidationError
@@ -72,7 +72,15 @@ class ProfileViewSet(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
     permission_classes = (IsAuthenticated, IsSelfOrAdminUpdateDeleteOnly,)
+    http_method_names = ['get', 'put', 'delete']
     ordering = ('-id',)
+
+    def perform_update(self, serializer):
+        """
+        Add `user` param as request user when creating update profile
+        """
+
+        serializer.save(user=self.request.user)
 
     @list_route(methods=['GET'],)
     def me(self, request, *args, **kwargs):

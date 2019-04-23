@@ -2,3 +2,4 @@
 static/
 .coverage
 htmlcov/
+media/

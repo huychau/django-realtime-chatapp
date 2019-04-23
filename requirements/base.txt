@@ -7,3 +7,4 @@ channels_redis
 channels
 uvicorn
 django-rest-swagger
+Pillow
