@@ -141,7 +141,7 @@ class Room(models.Model):
         User, on_delete=models.CASCADE, related_name='room_creator')
     users = models.ManyToManyField(User, related_name='room_users', default=user)
     created = models.DateTimeField(auto_now_add=True, editable=False)
-    updated = models.DateTimeField(default=datetime.datetime.now, editable=True)
+    updated = models.DateTimeField(auto_now_add=True, editable=True)
     latest_message = models.TextField(blank=True)
 
     objects = RoomManager()
