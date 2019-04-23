@@ -72,12 +72,27 @@ class ProfileViewSet(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
     permission_classes = (IsAuthenticated, IsSelfOrAdminUpdateDeleteOnly,)
-    http_method_names = ['get', 'put', 'delete']
+    http_method_names = ['get', 'put',]
     ordering = ('-id',)
+
+    def retrieve(self, request, pk=None):
+        """
+        Get profile detail base on user model
+        """
+
+        pk = pk ==  None and request.parser_context['kwargs']['pk'] or pk
+        user = User.objects.get(pk=pk)
+
+        user_serializer = UserSerializer(user, context={'request': request})
+
+        return Response(
+            user_serializer.data,
+            status=status.HTTP_200_OK
+        )
 
     def perform_update(self, serializer):
         """
-        Add `user` param as request user when creating update profile
+        Add `user` param as request user when updating profile
         """
 
         serializer.save(user=self.request.user)
@@ -87,6 +102,7 @@ class ProfileViewSet(viewsets.ModelViewSet):
         """
         Get current user profile
         """
+
         self.kwargs.update(pk=request.user.id)
         return self.retrieve(request, *args, **kwargs)
 
@@ -197,16 +213,9 @@ def login(request):
     user.save()
 
     # Get user profile
-    profile = Profile.objects.get(user=user)
-
-    # Serializer user to response
-    serializer = ProfileSerializer(profile, context={'request': request})
-
-    data = {
-        'refresh': str(token),
-        'access': str(token.access_token),
-        'profile': serializer.data
-    }
+    data = UserSerializer(user, context={'request': request}).data
+    data['refresh'] = str(token)
+    data['access'] = str(token.access_token)
 
     return Response(data, status=status.HTTP_200_OK)
 

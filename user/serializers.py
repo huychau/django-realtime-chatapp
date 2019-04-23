@@ -4,12 +4,29 @@ from rest_framework.validators import UniqueValidator
 from .models import User, Profile, Friend
 
 
+class ProfileSerializer(serializers.ModelSerializer):
+    """Profile Serializer"""
+
+    class Meta:
+        model = Profile
+        fields = (
+            'id',
+            'url',
+            # 'avatar',
+            'phone',
+            'bio',
+            'birth_date',
+            'address',
+        )
+
+
 class UserSerializer(serializers.ModelSerializer):
     """User Serializer"""
 
     # Modify fields
     email = serializers.EmailField(
         validators=[UniqueValidator(queryset=User.objects.all())])
+    profile = ProfileSerializer(read_only=True, many=False)
 
     class Meta:
         model = User
@@ -20,7 +37,8 @@ class UserSerializer(serializers.ModelSerializer):
             'email',
             'first_name',
             'last_name',
-            'is_online'
+            'is_online',
+            'profile'
         )
 
     def __init__(self, *args, **kwargs):
@@ -62,25 +80,6 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
-
-
-class ProfileSerializer(serializers.ModelSerializer):
-    """Profile Serializer"""
-
-    user = UserSerializer(read_only=True)
-
-    class Meta:
-        model = Profile
-        fields = (
-            'id',
-            'url',
-            'user',
-            'avatar',
-            'phone',
-            'bio',
-            'birth_date',
-            'address',
-        )
 
 
 class FriendSerializer(serializers.ModelSerializer):
