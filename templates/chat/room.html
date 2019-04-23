@@ -11,13 +11,16 @@
     <link rel='stylesheet prefetch' href='https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css'>
     <link rel='stylesheet prefetch' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.2/css/font-awesome.min.css'>
     <link rel="stylesheet" href="{% static 'style.css' %}" />
+    <title>Chat App</title>
   </head>
   <body>
     <div id="frame">
       <div id="sidepanel">
         <div id="profile">
           <div class="wrap">
-            <img id="profile-img" src="http://emilcarlsson.se/assets/mikeross.png" class="online" alt="" />
+            <a href="/api/profiles/{{user.id}}">
+              <img id="profile-img" src="https://png.pngtree.com/svg/20161027/631929649c.svg" class="online" alt="" />
+            </a>
             <p>{{ user }}</p>
             <a href="/api-auth/logout/?next=/chat/" class="expand-button" style="color: #fff; float: right;">Logout</a>
 
@@ -45,20 +48,23 @@
           </ul>
         </div>
         <div id="bottom-bar">
-          <button id="addcontact">
-          <i class="fa fa-user-plus fa-fw" aria-hidden="true"></i>
-          <span>Add contact</span>
-          </button>
-          <button id="settings">
-          <i class="fa fa-cog fa-fw" aria-hidden="true"></i>
-          <span>Settings</span>
-          </button>
+          <a id="addcontact" href="/api/friends">
+            <i class="fa fa-user-plus fa-fw" aria-hidden="true"></i>
+            <span>Add contact</span>
+          </a>
+          <a id="settings" href="/api/profiles/{{user.id}}">
+            <i class="fa fa-cog fa-fw" aria-hidden="true"></i>
+            <span>Settings</span>
+          </a>
         </div>
       </div>
       <div class="content">
         <div class="contact-profile">
           <img src="https://www.appiyus.com/wp-content/uploads/2016/04/chat-2-icon.png" alt="" />
-          <p id="room-name"></p>
+          <div>
+            <p id="room-name"></p>
+            <p id="room-users"></p>
+          </div>
         </div>
         <div class="messages" id="messages-wrap">
           <ul id="chat-logs">
@@ -107,17 +113,20 @@
           var roomUserText = '';
 
           for (let i = 0; i < roomUsers.length; i++) {
-            roomUserText += roomUsers[i].fields.username + ((i < roomUsers.length - 1) ? ' | ' : '');
+            roomUserText += roomUsers[i].fields.username + ((i < roomUsers.length - 1) ? ', ' : '');
           }
 
           // Update room name
-          $('#room-name').text(room.name + ' - ' + roomUserText)
+          $('#room-name').text(room.name);
+          $('#room-users').text(roomUserText);
+
+          document.title = room.name + ' | Chat App';
 
           for (let i = 0; i < data.messages.length; i++) {
             createMessage(data['messages'][i]);
           }
         } else if (command === 'new_message') {
-          createMessage(message);
+          createMessage(message, true);
         } else if (command === 'error_message') {
           alert('Error: ' + message);
         }
@@ -153,7 +162,7 @@
         chatSocket.send(JSON.stringify({'command': 'fetch_data'}));
       }
 
-      function createMessage(data) {
+      function createMessage(data, new_msg) {
 
         var msgListTag = document.createElement('li');
         var imgTag = document.createElement('img');
@@ -174,6 +183,10 @@
         msgListTag.appendChild(usernameTag);
         msgListTag.appendChild(msgTag);
         document.querySelector('#chat-logs').appendChild(msgListTag);
+
+        if (new_msg) {
+          messagesScroll();
+        }
       }
 
       function changeRoom(room) {
@@ -182,7 +195,9 @@
       }
 
       function messagesScroll() {
-        $('#messages-wrap').animate({ scrollTop: $('#messages-wrap').prop('scrollHeight')}, 1000);
+        setTimeout(function() {
+          $('#messages-wrap').animate({ scrollTop: $('#messages-wrap').prop('scrollHeight')}, 1000);
+        }, 300)
       }
 
       function openFileUpload(file) {
@@ -190,10 +205,7 @@
       }
 
       $(function() {
-        setTimeout(function() {
-          messagesScroll();
-        }, 100)
-
+        messagesScroll();
       });
 
     </script>

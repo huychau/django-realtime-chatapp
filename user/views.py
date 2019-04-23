@@ -3,7 +3,6 @@ from django.contrib.auth import authenticate, get_user_model, logout as auth_log
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.permissions import IsAuthenticated
-from rest_framework import viewsets
 from rest_framework.authentication import TokenAuthentication
 from rest_framework import viewsets, status
 from rest_framework.decorators import action, api_view, permission_classes, list_route
