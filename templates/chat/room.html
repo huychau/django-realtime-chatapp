@@ -37,7 +37,12 @@
           {% for room in rooms %}
             <li class="contact" onclick="changeRoom({{room.id}})">
               <div class="wrap">
-                <img src="https://www.appiyus.com/wp-content/uploads/2016/04/chat-2-icon.png" alt="" />
+
+                {% if room.photo %}
+                  <img src="http://localhost:8000/media/{{ room.photo }}" alt="" />
+                {% else %}
+                  <img src="https://www.appiyus.com/wp-content/uploads/2016/04/chat-2-icon.png" alt="" />
+                {% endif %}
                 <div class="meta">
                   <p class="name">{{ room.name }}</p>
                   <p class="preview">{{ room.latest_message }}</p>
@@ -60,7 +65,7 @@
       </div>
       <div class="content">
         <div class="contact-profile">
-          <img src="https://www.appiyus.com/wp-content/uploads/2016/04/chat-2-icon.png" alt="" />
+          <img src="" alt="" id="room-photo" />
           <div>
             <p id="room-name"></p>
             <p id="room-users"></p>
@@ -109,6 +114,10 @@
 
           room = data.room.fields;
           roomUsers = data.room_users;
+
+          var roomPhoto = room.photo ? (window.location.origin + '/media/' + room.photo) : 'https://www.appiyus.com/wp-content/uploads/2016/04/chat-2-icon.png';
+
+          $('#room-photo')[0].src = roomPhoto;
 
           var roomUserText = '';
 

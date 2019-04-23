@@ -143,6 +143,7 @@ class Room(models.Model):
     created = models.DateTimeField(auto_now_add=True, editable=False)
     updated = models.DateTimeField(auto_now_add=True, editable=True)
     latest_message = models.TextField(blank=True)
+    photo = models.ImageField(blank=True)
 
     objects = RoomManager()
 

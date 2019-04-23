@@ -20,6 +20,7 @@ class RoomSerializer(serializers.ModelSerializer):
             'user',
             'users',
             'url',
+            'photo',
             'updated',
             'latest_message'
         )

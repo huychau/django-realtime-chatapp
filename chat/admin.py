@@ -3,7 +3,7 @@ from .models import Room, Message
 
 
 class RoomAdmin(admin.ModelAdmin):
-    list_display = ('name', 'label', 'user', 'users')
+    list_display = ('name', 'label', 'user',)
     search_fields = ('name', 'user__username')
     list_filter = ('user',)
 
