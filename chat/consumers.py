@@ -59,7 +59,7 @@ class ChatConsumer(WebsocketConsumer):
 
             self.accept()
 
-    def disconnect(self, close_code):
+    def disconnect(self):
         """
         Disconnect form a channel
         """
@@ -83,7 +83,7 @@ class ChatConsumer(WebsocketConsumer):
         """
         return json.loads(serializers.serialize('json', data))
 
-    def fetch_data(self, data):
+    def fetch_data(self, data=None):
         """
         Fetch latest messages form a room
         """

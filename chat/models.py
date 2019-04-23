@@ -33,6 +33,7 @@ class RoomManager(models.Manager):
     def add_users(self, request_user, room_id, users):
         """
         Add new users to existed room
+        :param request_user: User logged in request
         :param room_id: Room ID
         :param users: List of user ID added to room
         """
@@ -53,13 +54,15 @@ class RoomManager(models.Manager):
             new_user = User.objects.get_user(new_user)
 
             # Check user is not friendship
-            if not Friend.objects.are_friends(request_user, new_user) and request_user != new_user:
+            if not Friend.objects.are_friends(request_user, new_user) \
+                and request_user != new_user:
                 raise ValidationError(
                     f'You do not add user is not your friend.')
 
             # Check user is existed
             if new_user in room_users:
-                raise ValidationError('You do not add user is existed in this room.')
+                raise ValidationError(
+                    'You do not add user is existed in this room.')
 
             room.users.add(new_user)
 
@@ -105,6 +108,12 @@ class RoomManager(models.Manager):
         return user in room.users.all()
 
     def set_latest_message(self, room, message):
+        """
+        Set latest message to a room
+        :param room: Room instance
+        :param message: Message text
+        """
+
         room = Room.objects.get_room(room.id)
         room.latest_message = message
         room.updated = datetime.datetime.now(tz=timezone.utc)
@@ -119,13 +128,16 @@ class MessageManager(models.Manager):
     def messages(self, user, room_id):
         """
         Get last messages
+        :param user: User requested
+        :param room_id: Id of room
         """
 
         # Check room is exist or not
         room = Room.objects.get_room(room_id)
 
         if user not in room.users.all():
-            raise ValidationError('You do not get messages from the room you are not joined.')
+            raise ValidationError(
+                'You do not get messages from the room you are not joined.')
 
         return Message.objects.select_related().filter(room=room).order_by('-created')
 

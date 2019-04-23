@@ -5,7 +5,9 @@ from .models import User, Profile, Friend
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-    """Profile Serializer"""
+    """
+    Profile Serializer
+    """
 
     class Meta:
         model = Profile
@@ -21,7 +23,9 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """User Serializer"""
+    """
+    User Serializer
+    """
 
     # Modify fields
     email = serializers.EmailField(
@@ -38,11 +42,14 @@ class UserSerializer(serializers.ModelSerializer):
             'first_name',
             'last_name',
             'is_online',
-            'profile'
+            'profile',
         )
 
     def __init__(self, *args, **kwargs):
-        """Custom to add partial=True to PUT method request to skip blank validations"""
+        """
+        Custom to add partial=True to PUT method request to skip blank
+        validations
+        """
 
         if kwargs.get('context'):
             request = kwargs['context'].get('request', None)
@@ -53,7 +60,9 @@ class UserSerializer(serializers.ModelSerializer):
         super(UserSerializer, self).__init__(*args, **kwargs)
 
     def get_fields(self, *args, **kwargs):
-        """Custom to add password field in POST method request"""
+        """
+        Custom to add password field in POST method request
+        """
 
         fields = super(UserSerializer, self).get_fields(*args, **kwargs)
         request = self.context.get('request', None)
@@ -83,7 +92,9 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class FriendSerializer(serializers.ModelSerializer):
-    """Friend Serializer"""
+    """
+    Friend Serializer
+    """
 
     from_user = UserSerializer(read_only=True)
     to_user = UserSerializer(read_only=True)
@@ -95,7 +106,7 @@ class FriendSerializer(serializers.ModelSerializer):
             'from_user',
             'to_user',
             'message',
-            'created'
+            'created',
         )
 
 class PasswordSerializer(serializers.Serializer):

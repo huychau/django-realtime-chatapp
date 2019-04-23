@@ -1,16 +1,14 @@
-from django.utils.safestring import mark_safe
-import json
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
+from django.db import IntegrityError
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import SearchFilter
-from django.db import IntegrityError
-from django.core import serializers
-from auth.permissions import (
+
+from chatapp.permissions import (
     IsAdminOrIsSelf,
     IsSelfOrAdminUpdateDeleteOnly,
     IsAdminReadOnly,
@@ -23,6 +21,10 @@ from .models import Room, Message
 
 
 class RoomViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint for rooms
+    """
+
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
     permission_classes = (IsAuthenticated, IsSelfOrAdminUpdateDeleteOnly)
@@ -60,7 +62,8 @@ class RoomViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
 
         except (ValidationError, IntegrityError) as e:
-            return Response({'detail': e.detail[0]}, status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': e.detail[0]},
+                            status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['delete'])
     def remove_users(self, request, pk=None):
@@ -76,12 +79,13 @@ class RoomViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
 
         except (ValidationError, IntegrityError) as e:
-            return Response({'detail': e.detail[0]}, status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': e.detail[0]},
+                            status.HTTP_400_BAD_REQUEST)
 
 
 class MessageViewSet(viewsets.ModelViewSet):
     """
-    Message viewset
+    API endpoint for messages
     """
 
     queryset = Message.objects.all()
@@ -108,7 +112,8 @@ class MessageViewSet(viewsets.ModelViewSet):
             return self.get_paginated_response(serializer.data)
 
         except ValidationError as e:
-            return Response({'detail': e.detail[0]}, status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': e.detail[0]},
+                            status.HTTP_400_BAD_REQUEST)
 
     def perform_create(self, serializer):
         """
@@ -124,9 +129,9 @@ def index(request):
     room = Room.objects.rooms(request.user)[0]
     return redirect('room', room=room.id)
 
+
 @login_required
 def room(request, room):
-
     # Get all user rooms
     rooms = list(Room.objects.rooms(request.user).values())
 

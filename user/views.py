@@ -11,7 +11,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter
 from rest_framework_simplejwt.tokens import RefreshToken
-from auth.permissions import (
+from chatapp.permissions import (
     IsAdminOrIsSelf,
     IsSelfOrAdminUpdateDeleteOnly,
     IsAuthenticatedReadOnly,
@@ -44,7 +44,9 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['put'],
             permission_classes=[IsAuthenticated, IsAdminOrIsSelf])
     def change_password(self, request, pk=None):
-        """Change user password"""
+        """
+        Change user password
+        """
 
         user = self.get_object()
         serializer = PasswordSerializer(data=request.data)
@@ -80,7 +82,7 @@ class ProfileViewSet(viewsets.ModelViewSet):
         Get profile detail base on user model
         """
 
-        pk = pk ==  None and request.parser_context['kwargs']['pk'] or pk
+        pk = pk == None and request.parser_context['kwargs']['pk'] or pk
         user = User.objects.get(pk=pk)
 
         user_serializer = UserSerializer(user, context={'request': request})
@@ -111,6 +113,7 @@ class FriendViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows friends to be viewed or edited.
     """
+
     queryset = ''
     serializer_class = FriendSerializer
     permission_classes = (IsAuthenticated, IsSelfOrAdminUpdateDeleteOnly,)
@@ -122,6 +125,7 @@ class FriendViewSet(viewsets.ModelViewSet):
         """
         Get friends
         """
+
         queryset = Friend.objects.friends(request.user)
         queryset = self.filter_queryset(queryset)
         page = self.paginate_queryset(queryset)
@@ -132,8 +136,7 @@ class FriendViewSet(viewsets.ModelViewSet):
     def create(self, request):
         """
         Creates a friend request
-        :param user_id: Friend ID
-        :param message: Add friend message
+        :param request: Request object
         returns: Friendship object
         """
 
@@ -147,24 +150,24 @@ class FriendViewSet(viewsets.ModelViewSet):
 
         try:
             friend_obj = Friend.objects.add_friend(
-                request.user, #The sender
-                User.objects.get_user(user_id),  # The recipient
+                request.user,
+                User.objects.get_user(user_id),
                 message=request.data.get('message', '')
             )
 
             return Response(
-                FriendSerializer(friend_obj, context={
-                                 'request': request}).data,
+                FriendSerializer(friend_obj, context={'request': request}).data,
                 status.HTTP_201_CREATED
             )
         except ValidationError as e:
-            return Response({'detail': e.detail[0]}, status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': e.detail[0]},
+                            status.HTTP_400_BAD_REQUEST)
 
     @action(methods=['delete'], detail=False)
     def delete(self, request, pk=None):
         """
         Creates a delete friend request
-        :param user_id: Friend ID
+        :param request: Request object
         returns: Friendship object
         """
 
@@ -178,17 +181,18 @@ class FriendViewSet(viewsets.ModelViewSet):
         try:
             success = Friend.objects.remove_friend(request.user, user_id)
             if success:
-                return Response(
-                    status=status.HTTP_204_NO_CONTENT
-                )
+                return Response(status=status.HTTP_204_NO_CONTENT)
         except ValidationError as e:
-            return Response({'detail': e.detail[0]}, status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': e.detail[0]},
+                            status.HTTP_400_BAD_REQUEST)
 
 
 @csrf_exempt
 @api_view(['POST'])
 def login(request):
-    """Login by username, password"""
+    """
+    Login by username, password
+    """
 
     username = request.data.get('username')
     password = request.data.get('password')

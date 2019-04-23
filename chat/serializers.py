@@ -7,7 +7,9 @@ from .models import Room, Message
 
 
 class RoomSerializer(serializers.ModelSerializer):
-    """Room Serializer"""
+    """
+    Room Serializer
+    """
 
     user = UserSerializer(read_only=True)
 
@@ -22,7 +24,7 @@ class RoomSerializer(serializers.ModelSerializer):
             'url',
             'photo',
             'updated',
-            'latest_message'
+            'latest_message',
         )
 
         extra_kwargs = {
@@ -33,8 +35,8 @@ class RoomSerializer(serializers.ModelSerializer):
 
     def validate_users(self, value):
         """
-
-        Add creator to the list if not and validate the user list should include at least 2 members
+        Add creator to the list if not and validate the user list should
+        include at least 2 members
         :param value: User list
         :returns List: User list
         """
@@ -57,34 +59,40 @@ class RoomSerializer(serializers.ModelSerializer):
         for new_user in value:
 
             # Check user friendship
-            if not Friend.objects.are_friends(user, new_user) and user != new_user:
+            if not Friend.objects.are_friends(user, new_user) \
+                and user != new_user:
                 raise ValidationError(
                     f'You do not add user is not your friend.')
 
         return value
 
     def to_representation(self, instance):
-        """Serializer for foreign key"""
+        """
+        Serializer for foreign key
+        """
 
         self.fields['users'] = UserSerializer(many=True)
         return super(RoomSerializer, self).to_representation(instance)
 
 
-
 class UserInMessageSerializer(serializers.ModelSerializer):
-    """Room Serializer"""
+    """
+    Room Serializer
+    """
 
     class Meta:
         model = User
         fields = (
             'id',
             'username',
-            'full_name'
+            'full_name',
         )
 
 
 class MessageSerializer(serializers.ModelSerializer):
-    """Message Serializer"""
+    """
+    Message Serializer
+    """
 
     user = UserInMessageSerializer(read_only=True)
 
@@ -108,5 +116,6 @@ class MessageSerializer(serializers.ModelSerializer):
 
         # Check user is not in room
         if not Room.objects.is_member(room, user):
-            raise ValidationError('You do not send message because you are not member in this room.')
+            raise ValidationError(
+                'You do not send message because you are not member in this room.')
         return room

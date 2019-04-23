@@ -45,7 +45,8 @@ class FriendshipManager(models.Manager):
 
         for friend in friends:
 
-            friend_obj = friend.from_user == user and friend.to_user or friend.from_user
+            friend_obj = friend.from_user == user and friend.to_user \
+                         or friend.from_user
 
             results.append(friend_obj)
 
@@ -94,7 +95,8 @@ class FriendshipManager(models.Manager):
         """
         Check users are friends
         """
-        friends = Friend.objects.filter(Q(from_user=user_1, to_user=user_2) | Q(from_user=user_2, to_user=user_1))
+        friends = Friend.objects.filter(Q(from_user=user_1, to_user=user_2)
+                                        | Q(from_user=user_2, to_user=user_1))
 
         return len(friends) > 0
 
@@ -102,7 +104,8 @@ class FriendshipManager(models.Manager):
 class User(AbstractUser):
     created = models.DateTimeField(auto_now_add=True, editable=False)
     username = models.CharField(
-        _('username'), unique=True, max_length=50, validators=[MinLengthValidator(2),])
+        _('username'), unique=True, max_length=50,
+        validators=[MinLengthValidator(2),])
     password = models.CharField(_('password'), max_length=128)
     email = models.EmailField(_('email address'), unique=True)
     first_name = models.CharField(max_length=50, blank=True)
@@ -115,7 +118,8 @@ class User(AbstractUser):
         ordering = ('-id',)
 
     def __str__(self):
-        return self.get_full_name() == '' and self.username or self.get_full_name()
+        return self.get_full_name() == '' and self.username \
+               or self.get_full_name()
 
     @property
     def full_name(self):
@@ -124,7 +128,10 @@ class User(AbstractUser):
 
 class Profile(models.Model):
     created = models.DateTimeField(auto_now_add=True, editable=False)
-    user = models.OneToOneField(settings.base.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile', unique=True)
+    user = models.OneToOneField(settings.base.AUTH_USER_MODEL,
+                                on_delete=models.CASCADE,
+                                related_name='profile',
+                                unique=True)
     birth_date = models.DateField(null=True, blank=True)
     phone = models.CharField(max_length=15, blank=True)
     bio = models.TextField(max_length=500, blank=True)
@@ -141,9 +148,11 @@ class Profile(models.Model):
 class Friend(models.Model):
     created = models.DateTimeField(auto_now_add=True, editable=False)
     from_user = models.ForeignKey(
-        settings.base.AUTH_USER_MODEL, related_name='creator', on_delete=models.CASCADE)
+        settings.base.AUTH_USER_MODEL, related_name='creator',
+        on_delete=models.CASCADE)
     to_user = models.ForeignKey(
-        settings.base.AUTH_USER_MODEL, related_name='friends', on_delete=models.CASCADE)
+        settings.base.AUTH_USER_MODEL, related_name='friends',
+        on_delete=models.CASCADE)
     message = models.CharField(max_length=100, blank=True)
 
     objects = FriendshipManager()

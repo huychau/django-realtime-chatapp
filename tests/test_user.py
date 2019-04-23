@@ -6,7 +6,6 @@ from .helpers import HelperAPITestCase
 class UserAPITest(HelperAPITestCase):
 
     def test_string_representation(self):
-
         user = User.objects.get(pk=1)
         full_name = user.get_full_name() == '' and user.username or user.get_full_name()
         self.assertEqual(str(user), full_name)
@@ -15,9 +14,8 @@ class UserAPITest(HelperAPITestCase):
 
         self.assertEqual(str(profile), profile.user.username)
 
-
     # REGISTRATION RESOURCES
-    #-----------------------
+    # -----------------------
 
     def test_user_login_empty_credentials(self):
         response = self.login()
@@ -63,12 +61,13 @@ class UserAPITest(HelperAPITestCase):
         self.assertEqual(response.data['email'][0],
                          'Enter a valid email address.')
         self.assertEqual(
-            response.data['username'][0], 'Ensure this field has at least 2 characters.')
+            response.data['username'][0],
+            'Ensure this field has at least 2 characters.')
         self.assertEqual(
-            response.data['password'][0], 'This password is too short. It must contain at least 8 characters.')
+            response.data['password'][0],
+            'This password is too short. It must contain at least 8 characters.')
 
     def test_create_new_user_unique_error(self):
-
         data = {
             'username': self.normaluser_credentials['username'],
             'password': 'abcd@1234',
@@ -79,9 +78,10 @@ class UserAPITest(HelperAPITestCase):
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data['email'][0],
-                        'This field must be unique.')
+                         'This field must be unique.')
         self.assertEqual(
-            response.data['username'][0], 'user with this username already exists.')
+            response.data['username'][0],
+            'user with this username already exists.')
 
     def test_create_new_user_ok(self):
         data = {
@@ -96,12 +96,13 @@ class UserAPITest(HelperAPITestCase):
         self.assertEqual(response.data['email'], data['email'])
         self.assertEqual(response.data['username'], data['username'])
 
-
     # USER RESOURCES
-    #---------------
+    # ---------------
 
-    def test_get_user_list_forbibden(self):
-        """User must login to get list user"""
+    def test_get_user_list_forbidden(self):
+        """
+        User must login to get list user
+        """
 
         response = self.get('user-list')
         self.assertEqual(response.status_code, 403)
@@ -113,17 +114,18 @@ class UserAPITest(HelperAPITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data['results']), 2)
 
-    def test_get_user_detail_forbibden(self):
+    def test_get_user_detail_forbidden(self):
         response = self.get('user-detail', None, [self.normaluser.id])
 
         self.assertEqual(response.status_code, 403)
 
     def test_get_user_detail_ok(self):
-        response = self.get('user-detail', self.normaluser_credentials, [self.normaluser.id])
+        response = self.get('user-detail', self.normaluser_credentials,
+                            [self.normaluser.id])
 
         self.assertEqual(response.status_code, 200)
 
-    def test_update_user_info_forbibden(self):
+    def test_update_user_info_forbidden(self):
         """
         Normal user can not update other use info
         """
@@ -132,7 +134,8 @@ class UserAPITest(HelperAPITestCase):
             'email': 'newemail@myproject.com'
         }
         response = self.put(
-            'user-detail', data, self.normaluser_credentials, args=[self.superuser.id])
+            'user-detail', data, self.normaluser_credentials,
+            args=[self.superuser.id])
 
         self.assertEqual(response.status_code, 403)
 
@@ -142,13 +145,15 @@ class UserAPITest(HelperAPITestCase):
         }
 
         response = self.put(
-            'user-detail', data, self.normaluser_credentials, args=[self.normaluser.id])
+            'user-detail', data, self.normaluser_credentials,
+            args=[self.normaluser.id])
 
         self.assertEqual(response.status_code, 200)
 
     def test_user_change_password_empty_field(self):
         response = self.put(
-            'user-change-password', {}, self.normaluser_credentials, args=[self.normaluser.id])
+            'user-change-password', {}, self.normaluser_credentials,
+            args=[self.normaluser.id])
 
         self.assertEqual(response.status_code, 400)
 
@@ -159,33 +164,32 @@ class UserAPITest(HelperAPITestCase):
         }
 
         response = self.put(
-            'user-change-password', data, self.normaluser_credentials, args=[self.normaluser.id])
+            'user-change-password', data, self.normaluser_credentials,
+            args=[self.normaluser.id])
 
         self.assertEqual(response.status_code, 400)
 
     def test_user_change_password_ok(self):
-
         data = {
             'old_password': self.normaluser_credentials['password'],
             'new_password': 'newpassword'
         }
 
         response = self.put(
-            'user-change-password', data, self.normaluser_credentials, args=[self.normaluser.id])
+            'user-change-password', data, self.normaluser_credentials,
+            args=[self.normaluser.id])
 
         self.assertEqual(response.status_code, 200)
 
-
     # PROFILE RESOURCES
-    #------------------
+    # ------------------
     def test_get_user_profile(self):
         response = self.get(
             'profile-me', self.normaluser_credentials)
         self.assertEqual(response.status_code, 200)
 
-
     # FRIEND RESOURCES
-    #------------------
+    # ------------------
 
     def test_get_friend_list(self):
         data = {
@@ -220,7 +224,6 @@ class UserAPITest(HelperAPITestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_add_new_friend_can_not_add_themselves(self):
-
         data = {'user_id': self.normaluser.id}
 
         response = self.post(
@@ -234,7 +237,7 @@ class UserAPITest(HelperAPITestCase):
             'message': 'hi!'
         }
 
-       # Add new friend
+        # Add new friend
         response = self.post(
             'friend-list', data, self.normaluser_credentials)
 
@@ -244,7 +247,6 @@ class UserAPITest(HelperAPITestCase):
             'friend-list', data, self.normaluser_credentials)
 
         self.assertEqual(response.status_code, 400)
-
 
     def test_add_new_friend_ok(self):
         data = {

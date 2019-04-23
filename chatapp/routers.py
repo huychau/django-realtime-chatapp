@@ -1,6 +1,12 @@
 from rest_framework import routers
 from django.urls import path
-from user.views import UserViewSet, ProfileViewSet, FriendViewSet, login, logout
+from user.views import (
+    UserViewSet,
+    ProfileViewSet,
+    FriendViewSet,
+    login,
+    logout,
+)
 from chat.views import RoomViewSet, MessageViewSet
 
 # Routers provide an easy way of automatically determining the URL conf.
