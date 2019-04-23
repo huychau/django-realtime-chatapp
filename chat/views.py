@@ -126,8 +126,10 @@ class MessageViewSet(viewsets.ModelViewSet):
 @login_required
 def index(request):
     # Get the last active room
-    room = Room.objects.rooms(request.user)[0]
-    return redirect('room', room=room.id)
+    room = Room.objects.rooms(request.user)
+
+    if len(room):
+        return redirect('room', room=room[0].id)
 
 
 @login_required

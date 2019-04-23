@@ -59,7 +59,7 @@ class ChatConsumer(WebsocketConsumer):
 
             self.accept()
 
-    def disconnect(self):
+    def disconnect(self, close_code):
         """
         Disconnect form a channel
         """
