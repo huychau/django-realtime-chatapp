@@ -12,7 +12,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'url',
-            # 'avatar',
+            'avatar',
             'phone',
             'bio',
             'birth_date',
