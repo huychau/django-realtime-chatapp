@@ -27,6 +27,12 @@ class RoomSerializer(serializers.ModelSerializer):
             'latest_message',
         )
 
+        read_only_fields = (
+            'id',
+            'label',
+            'latest_message',
+        )
+
         extra_kwargs = {
             'users': {
                 'required': True
