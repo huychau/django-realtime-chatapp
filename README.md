@@ -1,14 +1,15 @@
-# Django 2.1 Chatapp Development
+# Django Real-time Chatapp
+Django real-time chat app with Channels and development with Docker compose, bash script
 
-## Requirement
+## Requirements
 - Docker
 - Docker compose
 - Bash script
 
 ## Getting started
 
-### Activate helper script
-At `chatapp/`, run `source .activate.sh`
+### Activate helper scripts
+Run `source .activate.sh`
 
 ### Available environemts
 - dev
